@@ -1,3 +1,5 @@
+* Create component encapsulating the behavior pantry-meal item cards with popup detailed view
+
 * Create components representing an individual pantry item like a shopping cart item
 
 * Create component representing an individual meal with detailed view popup

@@ -1,14 +1,20 @@
-import {ScrollView, View, Text } from 'react-native';
-import { ThemedView } from '@/components/themed-view';
-import { FlatList } from 'react-native-reanimated/lib/typescript/Animated';
+import { Text, View } from "react-native";
+import { FlatList } from "react-native-reanimated/lib/typescript/Animated";
 
-
-export default function Pantry() {
+export default function Index() {
   return (
-    <ThemedView>
-      {/* <FlatList>
-          
-      </FlatList> */}
-    </ThemedView>
+
+    // <FlatList>
+
+    // </FlatList>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text>Edit app/index.tsx to edit this screen.</Text>
+    </View>
   );
 }
