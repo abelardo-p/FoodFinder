@@ -1,63 +1,11 @@
 import sqlite3
 
+# DON"T NEED THIS ANYMORE??
+
 SQLITE_PATH = "local_session.db"
 
 # connection.execute("DROP TABLE userSession")
 
-
-# Schemas Defined:
-"""
-To get all items in pantry, get all rows in this table
-
-Item Table:
-varchar FoodType
-varchar ShelfLife
-enum StorageMode
-int Quantity
-varchar CanonicalName
-Boolean? Low Stock Threshold
-...anymore fields?
-int FoodId*
-
-
-From PostgresSQL:
-USDA:
-int FoodID*
-varchar FoodName
-varchar? Keywords
-varchar? Name_Subtitle
-
-How should we store recipes in the database? Espically when some data types are array of strings.
-Recipes:
-varchar? NER*
-varchar? Ingredient List*
-varchar? Directions*
-varchar Link
-Image?
-int RecipeID*
-
-Foods_In_Recipes:
-int FoodID*
-int RecipeID*
-(March between NER and FoodName/Keywords/Name_Subtitle?) // Talk about this more
-
-When user does a search, join USDA and Foods_In_recipes?
-
-Category Table:
-varchar FoodType
-int FoodTypeID (Foreign Key)*
-
-Storage Table:
-varchar StorageType
-varchar FoodType
-int FoodTypeID (Foreign Key)*
-
-
-Shelf Life Table:
-varchar ShelfLife
-FoodTypeID (Foreign Key)*
-
-"""
 
 def init_sqlite():
     

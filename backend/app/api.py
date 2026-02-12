@@ -29,18 +29,10 @@ todos = [
 ]
 
 # DO THIS REINA. MAKE A SQLITE SCHEMA JUST FOR THE USER METADATA
-@app.get("/pantry-list", tags=["pantry"])
-async def get_pantry_list() -> dict:
-    # call database
-    
-    return { "data": todos }
-
 @app.post("/add-item", tags=["pantry"])
 async def add_item_to_pantry_list() -> dict:
-    return { "data": todos }
-
-@app.post("/update-quantity", tags=["pantry"])
-async def add_item_to_pantry_list() -> dict:
+	# Check from postgres side to make sure it's a real item
+    # This will return two different types of jsons, error or good
     return { "data": todos }
 
 ################################################################
