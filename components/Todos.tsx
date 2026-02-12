@@ -1,9 +1,8 @@
-import {
-	Container,
-	Stack
-} from "@chakra-ui/react";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
+
+
+// THIS IS FOR TESTING ONLY
 interface Todo {
   id: string;
   item: string;
@@ -12,6 +11,19 @@ interface Todo {
 const TodosContext = createContext({
   todos: [], fetchTodos: () => {}
 })
+
+const Bulletpoints = () => {
+
+	const { todos } = useContext(TodosContext);
+
+	return (
+		<ul>
+		{todos.map((todo: Todo) => (
+			<li key={todo.id}>{todo.item}</li>
+		))}
+		</ul>
+	)
+};
 
 
 export default function Todos() {
@@ -28,13 +40,7 @@ export default function Todos() {
 
 	return (
 	<TodosContext.Provider value={{todos, fetchTodos}}>
-		<Container maxW="container.xl" pt="100px">
-		<Stack gap={5}>
-			{todos.map((todo: Todo) => (
-			<b key={todo.id}>{todo.item}</b>
-			))}
-		</Stack>
-		</Container>
+		<Bulletpoints />
 	</TodosContext.Provider>
 	)
 }
