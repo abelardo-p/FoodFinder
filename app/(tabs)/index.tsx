@@ -1,4 +1,4 @@
-import ItemCard from "@/components/ui/item-card";
+import ItemCardCollapsible from "@/components/ui/item-card-collapsible";
 import SearchBar from "@/components/ui/search-bar";
 import { Text, View } from "react-native";
 
@@ -14,14 +14,14 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <SearchBar onChangeCallback={updateFunction}>
+      <SearchBar onChangeCallBack={updateFunction}>
 
       </SearchBar>
-      <ItemCard head={<Text style={{fontWeight: '500'}}>Edit app/index.tsx to edit this screen.</Text>}>
+      <ItemCardCollapsible head={<Text style={{fontWeight: '500'}}>Edit app/index.tsx to edit this screen.</Text>}>
       <View>
         <Text>Hidden Content</Text>
       </View>
-      </ItemCard>
+      </ItemCardCollapsible>
     </View>
   );
 }

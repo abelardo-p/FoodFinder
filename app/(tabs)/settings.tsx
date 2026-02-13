@@ -5,7 +5,7 @@ export default function Settings() {
     return (
         <View>
             Empty View
-            <ThemedButton style={{flexDirection: 'column', width: '25%'}} text='button' onPress={() => {}}></ThemedButton>
+            <ThemedButton style={{flexDirection: 'column', width: '50%'}} text='button' onPress={() => {}}></ThemedButton>
         </View>
     )
 }
