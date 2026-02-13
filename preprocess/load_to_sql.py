@@ -30,7 +30,7 @@ def load_datasets(csv_files_path: str, table_name: str, load_mode: str, username
         populate_table()
         return
     
-    for path in csv_files_path.iterdir():
+    for path in sorted(csv_files_path.iterdir()):
         df = pd.read_csv(path)
         df.columns = df.columns.str.lower()
         populate_table()
