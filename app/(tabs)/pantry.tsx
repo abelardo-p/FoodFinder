@@ -1,5 +1,4 @@
 import { Text, View } from "react-native";
-import { FlatList } from "react-native-reanimated/lib/typescript/Animated";
 
 export default function Index() {
   return (
