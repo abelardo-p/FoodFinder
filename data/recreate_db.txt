@@ -1,0 +1,11 @@
+Instructions to populate db with dump.sql contents:
+
+1: Create new db:
+    createdb <new_db_name>
+
+2. Restore the contents from dump.sql:
+    pg_restore -h <hostname> -U <your username> -d <new_db_name> -v <path to dump.sql>
+
+3. Connect to db like normal:
+    psql <new_db_name>
+    

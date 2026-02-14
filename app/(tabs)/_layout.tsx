@@ -20,6 +20,12 @@ export default function TabLayout() {
             title: 'Pantry',
             }}
         />
+        <Tabs.Screen        
+            name="settings"
+            options={{
+            title: 'Settings',
+            }}
+        />
         </Tabs>
     );
 }
