@@ -1,17 +1,27 @@
-import { PropsWithChildren, ReactNode, useState} from "react";
-import { View, StyleSheet, TouchableOpacity, Text} from "react-native";
+import { ReactNode, useState } from "react";
+import { View, StyleSheet, TouchableOpacity, Text, ViewProps, StyleProp, ViewStyle} from "react-native";
 
-export default function ItemCard({ head, children }: PropsWithChildren & { head: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+
+type ItemCardProps = ViewProps & {
+  head: ReactNode;
+  isActive?: boolean;
+  pressableStyle?: StyleProp<ViewStyle>;
+  longPressStyle?: StyleProp<ViewStyle>;
+  onClickCallBack: () => void;
+  onLongClickCallBack?: () => void;
+};
+
+export default function ItemCard({head, isActive, pressableStyle, longPressStyle, onClickCallBack, onLongClickCallBack}: ItemCardProps) {
+
   return (
-    <View style={[styles.bubble]}>
-      <TouchableOpacity
-        onPress={() => setIsOpen((value) => !value)}
-        activeOpacity={0.6}>
-        <View style={styles.heading}>{head}</View>
-        {isOpen && <View style={styles.content}>{children}</View>}
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      onPress={() => onClickCallBack()}
+      onLongPress={() =>  onLongClickCallBack?.() }
+      activeOpacity={0.6}
+      style={[styles.bubble, pressableStyle, isActive && longPressStyle]}
+    >
+      {head}
+    </TouchableOpacity>
   );
 }
 
@@ -21,21 +31,21 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'lightgrey',
     padding: 5,
     borderRadius: 10,
-    gap: 10
   },
-    heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    margin: 12
-  },
-  content: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 10,
-    marginTop: 0,
-  }
+  // heading: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   margin: 12
+  // },
+  // content: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   margin: 10,
+  //   marginTop: 0,
+  // }
 });
