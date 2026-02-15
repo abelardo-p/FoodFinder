@@ -24,7 +24,7 @@ const data: Item[] = [
 
 const cardElement = (text: string) => {
   return (
-    <Text style={{fontSize: 18}}>
+    <Text style={{marginLeft: 20, fontSize: 18}}>
       {text}
     </Text>
   )
@@ -65,8 +65,8 @@ export default function Index() {
       }}
     >
       <SearchBar
-        containerStyle={{ marginBottom: 0 }} 
-        searchBarStyle={{ height: 55, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
+        containerStyle={{}} 
+        searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
         onChange={() => {}}
         onFocus={() => {setFocus(!isFocus)}}
         onBlur={() => {setFocus(!isFocus)}}
@@ -79,11 +79,15 @@ export default function Index() {
           renderItem={({ item } ) => (
             dataElement(item.name)
           )}
-          style={{ maxHeight: 450, width: 200, borderRadius: 11, borderWidth: 3, margin: 10, padding: 10, backgroundColor: 'snow'}}
+          style={{ shadowColor: '#000',
+                  shadowOffset: { width: 1, height: 4 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 6,
+                  maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, padding: 10, backgroundColor: 'snow'}}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
-      ) : (<View style={{margin: 10}}></View>)}
+      ) : (<View style={{margin: 15}}></View>)}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
@@ -93,7 +97,7 @@ export default function Index() {
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}
-            pressableStyle={{ margin: 4, height: 50, minWidth: 200, maxWidth: 250, minHeight: 75, borderWidth: 0, borderRadius: 15}}
+            pressableStyle={{ alignItems: 'flex-start', margin: 5, height: 80, minWidth: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
             longPressStyle={{ backgroundColor: 'lightcoral' }}
           />
         )}
