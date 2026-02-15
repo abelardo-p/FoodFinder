@@ -35,6 +35,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightgrey',
     padding: 5,
     borderRadius: 10,
+
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   // heading: {
   //   flexDirection: 'row',
