@@ -1,5 +1,7 @@
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig('../metro.config.js');
+const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
  
 // Add wasm asset support
 config.resolver.assetExts.push('wasm');

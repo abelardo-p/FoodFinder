@@ -1,10 +1,22 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import { View } from "react-native";
-import Todos from "../../components/Todos";
+import { View, Text } from "react-native";
+// import Todos from "../../components/Todos";
 
-const updateFunction = (text: string) => {
-  console.log("FML")
-}
+// const updateFunction = (text: string) => {
+//   console.log("FML")
+// }
+
+// const getData = () => {
+// 	database()
+// 	for elemenet.ma
+// }
+// const dbField = (str: string) => {
+// 	return (
+// 		<Text>
+// 			{}
+// 		</Text>
+// 	);
+// };
 export default function Index() {
 	const db = useSQLiteContext(); // LET'S SAY YOU WANT TO CALL THE DATABASE, JUST CALL THIS LINE!!
 
@@ -16,7 +28,7 @@ export default function Index() {
 			alignItems: "center",
 		}}
 		>
-		<Todos />
+		{/* <Todos /> */}
 
 
 		{/* <ItemCard head={<Text style={{fontWeight: '500'}}>Edit app/index.tsx to edit this screen.</Text>}>
