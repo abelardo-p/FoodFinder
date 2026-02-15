@@ -1,4 +1,4 @@
-import { Text, View, FlatList, LayoutAnimation, Pressable } from "react-native";
+import { Text, View, FlatList, LayoutAnimation, Pressable, StyleSheet} from "react-native";
 import ItemCard from "@/components/ui/item-card";
 import SearchBar from "@/components/ui/search-bar";
 import { useState } from "react";
@@ -14,6 +14,12 @@ const data: Item[] = [
   {id: '4', name: 'potato'},
   {id: '5', name: 'hamburger'},
   {id: '6', name: 'soup'},
+  {id: '7', name: 'apple'},
+  {id: '8', name: 'banana'},
+  {id: '9', name: 'bread'},
+  {id: '10', name: 'potato'},
+  {id: '11', name: 'hamburger'},
+  {id: '12', name: 'soup'},
 ];
 
 const cardElement = (text: string) => {
@@ -23,16 +29,18 @@ const cardElement = (text: string) => {
     </Text>
   )
 }
-
 const dataElement = (text: string) => {
   return (
-    <Pressable>
-
+    <Pressable style={{ justifyContent: 'center', alignItems: 'center', margin: 12}}>
+      <Text style={{fontSize: 16}}>
+        {text}
+      </Text>
     </Pressable>
   )
 }
 
 export default function Index() {
+  const [isFocus, setFocus] = useState(false);
   const [items, setItems] = useState<Item[]>(data);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -43,7 +51,6 @@ export default function Index() {
       LayoutAnimation.configureNext(
         LayoutAnimation.Presets.easeInEaseOut
       );
-
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
     }, 300);
@@ -52,18 +59,31 @@ export default function Index() {
     <View
       style={{
       flex: 1,
-      justifyContent: "flex-start", 
+      justifyContent: "center", 
       alignItems: "center",
-      marginTop: 115
+      marginTop: 105
       }}
     >
-      <SearchBar onChangeCallBack={() => {}} 
-        containerStyle={{ marginBottom: 25 }} 
-        searchBarStyle={{ height: 55, width: 250, borderWidth: 3, borderRadius: 10  }}>
+      <SearchBar
+        containerStyle={{ marginBottom: 0 }} 
+        searchBarStyle={{ height: 55, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
+        onChange={() => {}}
+        onFocus={() => {setFocus(!isFocus)}}
+        onBlur={() => {setFocus(!isFocus)}}
+      >
       </SearchBar>
-      {/* <FlatList>
-        basic stack of ingredients that where pressable
-      </FlatList> */}
+      {isFocus ? (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item } ) => (
+            dataElement(item.name)
+          )}
+          style={{ maxHeight: 450, width: 200, borderRadius: 11, borderWidth: 3, margin: 10, padding: 10, backgroundColor: 'snow'}}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      ) : (<View style={{margin: 10}}></View>)}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
@@ -73,12 +93,21 @@ export default function Index() {
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}
-            pressableStyle={{ margin: 4, width: 65, height: 50, minWidth: 125, maxWidth: 250 }}
+            pressableStyle={{ margin: 4, height: 50, minWidth: 200, maxWidth: 250, minHeight: 75, borderWidth: 0, borderRadius: 15}}
             longPressStyle={{ backgroundColor: 'lightcoral' }}
           />
         )}
+        showsVerticalScrollIndicator={false}
       />  
 
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  separator: {
+    backgroundColor: 'grey',
+    marginHorizontal: 20,
+    borderBottomWidth: 1,
+  },
+});
