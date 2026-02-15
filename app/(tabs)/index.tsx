@@ -1,6 +1,5 @@
-import ItemCard from "@/components/ui/item-card";
 import { useSQLiteContext } from 'expo-sqlite';
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Todos from "../../components/Todos";
 
 const updateFunction = (text: string) => {
@@ -20,11 +19,11 @@ export default function Index() {
 		<Todos />
 
 
-		<ItemCard head={<Text style={{fontWeight: '500'}}>Edit app/index.tsx to edit this screen.</Text>}>
+		{/* <ItemCard head={<Text style={{fontWeight: '500'}}>Edit app/index.tsx to edit this screen.</Text>}>
 		<View>
 			<Text>Hidden Content</Text>
 		</View>
-		</ItemCard>
+		</ItemCard> */}
 		</View>
   );
 }
