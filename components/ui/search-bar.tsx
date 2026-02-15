@@ -2,18 +2,22 @@ import { useState } from "react";
 import { View, StyleSheet, Text, TextInput, StyleProp, ViewStyle, TextStyle} from "react-native";
 
 type searchBarProps = {
+  onChange: (text: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
   searchBarStyle?: StyleProp<TextStyle>;
-  onChangeCallBack: (text: string) => void;
 }
 
-export default function SearchBar({containerStyle, searchBarStyle, onChangeCallBack}: searchBarProps) {
+export default function SearchBar({onChange, onFocus, onBlur, containerStyle, searchBarStyle}: searchBarProps) {
   const [text, setText] = useState(''); 
   return (
     <View style={[containerStyle, containerStyle]}>
       <TextInput
         placeholder="Search Ingredients"
-        onChangeText={(text: string) => {setText(text); onChangeCallBack(text);}}
+        onChangeText={(text: string) => {setText(text); onChange(text);}}
+        onFocus= {() => onFocus?.()}
+        onBlur = {() => onBlur?.()}
         defaultValue={text}
         style={[styles.searchBar, searchBarStyle]}
       />
