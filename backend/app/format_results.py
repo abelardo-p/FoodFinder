@@ -1,6 +1,6 @@
 from collections import defaultdict
-
 from krovetzstemmer import Stemmer
+import sqlalchemy
 
 ks = Stemmer()
 
@@ -29,6 +29,23 @@ def format_items(ingredients_to_keywords: dict[str, dict[int, list[str]]]):
             ingredients_to_keywords[name][ing_id] = processed[ing_id] - common
 
     return ingredients_to_keywords
+
+def format_item_results(rows: list[sqlalchemy.engine.Row]):
+    """Formats & deduplicates ingredient names/keywords returned by a keyword-search query"""
+    ingredients_to_keywords = defaultdict(dict)
+    # Group ingredients with the same name together
+    for row in rows:
+        d = row._asdict()
+        name = d["name"].lower()
+        ing_id = int(d["id"])
+        ing_keywords = d["keywords"] or []
+
+        if name not in ingredients_to_keywords:
+            ingredients_to_keywords[name] = {}
+
+        ingredients_to_keywords[name][ing_id] = list(ing_keywords)
+
+    return format_items(ingredients_to_keywords)
 
 # Test input:
 test_input = {
