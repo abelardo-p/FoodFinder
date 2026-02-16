@@ -62,7 +62,7 @@ export default function Index() {
             shadowOffset: { width: 1, height: 4 },
             shadowOpacity: 0.2,
             shadowRadius: 6,
-            borderRadius: 11, borderWidth: 0, margin: 10, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
+            borderRadius: 12, borderWidth: 0, marginTop: 50, marginBottom: 25, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
         showsVerticalScrollIndicator={false}
 			/>		
 		</View>

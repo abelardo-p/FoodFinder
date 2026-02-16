@@ -1,18 +1,17 @@
 import * as SQLite from 'expo-sqlite';
 
-
 interface Ingredient {
 	name: string;
-	id: string;
+	id: number;
 	broad_category: string;
 	storage: string;
-	min_days: Number;
-	max_days: Number;
+	min_days: number;
+	max_days: number;
 }
 
 const defaultConfig: Ingredient = {
   name: 'omomo',
-  id: '1',
+  id: 1,
   broad_category: 'bruh',
   storage: 'bruh',
   min_days: 0,
@@ -79,11 +78,12 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 		);
   	`);
 
+	// insertIntoFoodItem(db);
 	printTable(db);
 
 }
 
-export async function deleteItemFromDB(id: string, db: SQLite.SQLiteDatabase) {
+export async function deleteItemFromDB(id: number, db: SQLite.SQLiteDatabase) {
 	try {
 		await db.runAsync('DELETE FROM FoodItem WHERE id = $value', { $value: id })
 	} catch (error) {
@@ -117,7 +117,7 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, foodObj: Ing
 
 	try {
 		let result = await statement.executeAsync({ 
-			$foodID: '100', 
+			$foodID: 0, 
 			$foodName: 'omomo',
 			$foodCat: 'bruh',
 			$foodStor: 'bruh',

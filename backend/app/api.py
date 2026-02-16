@@ -1,25 +1,34 @@
 import os
 
-from fastapi import Depends, FastAPI, HTTPException
+import sqlalchemy
+from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
+from pydantic import BaseModel
+from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
+
+from .format_results import format_item_results, format_items
+
+
+class SearchSchema(BaseModel):
+    item: str
+    
 
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
 port = 5432 
 
-DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
+# DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
+DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
+
 
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
 Session = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:8081",
-    "localhost:8081"
-]
+# Allows calls from:
+origins = ["http://localhost:8081"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,40 +46,43 @@ def get_db():
     finally:
         db.close() 
 
-todos = [
-    {
-        "id": "1",
-        "item": "Get Omomo."
-    },
-    {
-        "id": "2",
-        "item": "Skip 125."
-    },
-]
+
+def format_item_results(rows: list[sqlalchemy.engine.Row]):
+    """Formats & deduplicates ingredient names/keywords returned by a keyword-search query"""
+    ingredients_to_keywords = {}
+    # Group ingredients with the same name together
+    for row in rows:
+        d = row._asdict()
+        name = d["name"].lower()
+        ing_id = int(d["id"])
+        ing_keywords = d["keywords"] or []
+        ingredients_to_keywords[name][ing_id] = list(ing_keywords)
+
+    return format_items(ingredients_to_keywords)
 
 # It's a POST request since we're just checking if item is valid
-# Returns a list of results based on how many items are queries from the keywords
+# Returns a list of results sized based on how many items are queried from the keywords
 @app.post("/search", tags=["pantry"])
-async def search_item(item: str, db = Depends(get_db)) -> dict:
-	# Check from postgres side to make sure it's a real item
-    # This will return two different types of jsons, error or good
-
-    # They choose which actual item they want from the frontend, from there, item id is passed back to
-    # the backend and then we get the right item for them
-    query = """
-    SELECT name, id 
+async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
+    query = text("""
+    SELECT id, name, keywords
     FROM ingredient 
-    WHERE keywords @> ARRAY[:item];
-    """
-    item = item.split()
-    results = db.execute(query, {"item": item}).fetchall
+    WHERE keywords @> :item;
+    """)
+    
+    item_list = data.item.split()
+    item_list = [word.lower() for word in item_list]
 
+    print(item_list)
+    results = db.execute(query, {"item": item_list}).fetchall()
     print(f'Result: {results}')
 
     if not results:
         return { "status" : "err"}
     
-    return { "item" : 'omomo' }
+    formatted = format_items(format_item_results(results))
+    print(formatted)
+    return {"status": "ok", "results": formatted}
 
 
 # SQL LITE Database:
@@ -95,7 +107,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
 # * id (int), pk
 # * category_id (int), fk
 # * name (str)
-# * keywords (varchar or TEXT[])    *right now keywords is a tokenized list but we may need to concatenate them to use Full-text search
+# * keywords (TEXT[])    
 
 # ShelfLives (per Ingredient):
 # * id (int), pk
@@ -111,7 +123,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
 # * subcategory (varchar)
 
 @app.get("/add_item", tags=["pantry"])
-async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
+async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
 
 
     query = """
@@ -119,7 +131,7 @@ async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
         FROM ingredient as i 
         JOIN categories as c on c.id = i.id 
         JOIN shelflives as sl on sl.fk_id = i.id  
-        where id = :id;
+        where i.id = :id;
     """
 
     results = db.execute(query, {"id": food_id}).fetchall
@@ -128,11 +140,6 @@ async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
     print(f'Results: {results}')
 
     return {}
-
-
-@app.get("/todo", tags=["todos"])
-async def get_todos() -> dict:
-    return { "data": todos }
 
 
 @app.get("/", tags=["root"])

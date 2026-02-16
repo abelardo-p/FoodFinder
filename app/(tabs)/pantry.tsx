@@ -1,10 +1,12 @@
-import { Text, View, FlatList, LayoutAnimation, Pressable, StyleSheet} from "react-native";
 import ItemCard from "@/components/ui/item-card";
 import SearchBar from "@/components/ui/search-bar";
-import { useState } from "react";
+import * as dbFunctions from "@/src/schema";
+import { useSQLiteContext } from "expo-sqlite";
+import { useEffect, useState } from "react";
+import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Item = {
-  id: string;
+  id: number;
   name: string;
 }
 const data: Item[] = [
@@ -48,13 +50,64 @@ const dataElement = (text: string, onPress: () => void) => {
 }
 
 export default function Index() {
+  const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
   const [isCatSelected, setCatSelected] = useState(false);
-  const [items, setItems] = useState<Item[]>(data);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [results, setSearchResults] = useState([]);
 
 
+  useEffect(() => {
+
+	const fetchItems = async () => {
+		const foodItems = await dbFunctions.fetchItemsForPantry(db);
+		console.log(foodItems);
+		setItems((foodItems as Item[]) ?? []);
+	};
+
+	fetchItems();
+  	}, 
+	[]
+  );
+
+  useEffect(() => {
+	// Don't search if below minimum length
+	if (searchQuery.length > 0 && searchQuery.length < 3) {
+		setSearchResults([]);
+		return;
+	}
+
+	const timeoutId = setTimeout(async () => {
+		if (searchQuery.length >= 3) {
+			try {
+        console.log(searchQuery)
+				const response = await fetch(`http://localhost:8000/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ item: searchQuery })
+        });
+
+        const data = await response.json();
+
+        if (!data) return [];
+				setSearchResults(data);
+			} catch (error) {
+        console.error('Search failed:', error);
+        setSearchResults([]);
+			}
+		} else {
+			setSearchResults([]);
+		}
+	}, 2000); 
+
+	return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+  
   const handleGroupPress = () => {
     setGroupSelected(true);
   }
@@ -64,7 +117,7 @@ export default function Index() {
     setCatSelected(false);
   }
 
-  const handleLongPress = (id: string) => {
+  const handleLongPress = (id: number) => {
     setActiveId(id);
 
     setTimeout(() => {
@@ -73,8 +126,12 @@ export default function Index() {
       );
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
+	  dbFunctions.deleteItemFromDB(id, db);
     }, 300);
+
+	dbFunctions.printTable(db);
   };
+
   return (
     <View
       style={{
@@ -87,7 +144,7 @@ export default function Index() {
       <SearchBar
         containerStyle={{}} 
         searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
-        onChange={() => {}}
+        onChange={(text: string) => setSearchQuery(text)}
         onFocus={() => {setFocus(true)}}
         onBlur={() => {}}
       >
@@ -96,7 +153,7 @@ export default function Index() {
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
           <FlatList
-          data={items}
+          data={results}
           keyExtractor={(item) => item.id}
           renderItem={({ item } ) => (
             dataElement(item.name, handleGroupPress)
@@ -112,7 +169,7 @@ export default function Index() {
 
         {isGroupSelected && !isCatSelected ? (
           <FlatList
-            data={items}
+            data={results}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
               dataElement(item.name, handleCatPress)

@@ -7,17 +7,17 @@ OVERRIDES = {
         "ice cream","gelato","sorbet","pudding","mousse","custard",
         "frosting","icing","fudge","toffee","macaron","macaroon","blondie"
     ),
-    "breakfast": (
-        "pancake","waffle","omelet","omelette","frittata",
-        "breakfast burrito","breakfast sandwich","granola",
-        "oatmeal","porridge","french toast","hash browns",
-        "crepe","muffin"
-    ),
     "side": (
         "coleslaw", "slaw", "dip", "sauce", "roasted potatoes",
         "garlic bread","dinner rolls","cornbread","stuffing",
         "rice pilaf","pasta salad","potato salad","side salad",
         "roasted vegetables","grilled vegetables","glazed carrots"
+    ),
+    "breakfast": (
+        "pancake","waffle","omelet","omelette","frittata",
+        "breakfast burrito","breakfast sandwich","granola",
+        "oatmeal","porridge","french toast","hash browns",
+        "crepe","muffin"
     ),
     "lunch": (
         "sandwich","wrap","panini","grilled cheese","melt",
