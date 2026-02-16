@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from format_results import format_items
 
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
@@ -16,10 +17,8 @@ Session = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:8081",
-    "localhost:8081"
-]
+# Allows calls from:
+origins = ["http://localhost:8081"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,8 +47,21 @@ todos = [
     },
 ]
 
+def format_item_results(rows: list[sqlalchemy.engine.Row]):
+    """Formats & deduplicates ingredient names/keywords returned by a keyword-search query"""
+    ingredients_to_keywords = {}
+    # Group ingredients with the same name together
+    for row in rows:
+        d = row._asdict()
+        name = d["name"].lower()
+        ing_id = int(d["id"])
+        ing_keywords = d["keywords"] or []
+        ingredients_to_keywords[name][ing_id] = list(ing_keywords)
+
+    return format_items(ingredients_to_keywords)
+
 # It's a POST request since we're just checking if item is valid
-# Returns a list of results based on how many items are queries from the keywords
+# Returns a list of results sized based on how many items are queried from the keywords
 @app.post("/search", tags=["pantry"])
 async def search_item(item: str, db = Depends(get_db)) -> dict:
 	# Check from postgres side to make sure it's a real item
@@ -58,19 +70,19 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
     # They choose which actual item they want from the frontend, from there, item id is passed back to
     # the backend and then we get the right item for them
     query = """
-    SELECT name, id 
+    SELECT id, name, keywords
     FROM ingredient 
     WHERE keywords @> ARRAY[:item];
     """
 
-    results = db.execute(query, {"item": item}).fetchall
-
+    results = db.execute(query, {"item": item}).fetchall()
     print(f'Result: {results}')
 
     if not results:
         return { "status" : "err"}
     
-    return { "item" : 'omomo' }
+    formatted = format_item_results(results)
+    return {"status": "ok", "results": formatted}
 
 
 # SQL LITE Database:
@@ -95,7 +107,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
 # * id (int), pk
 # * category_id (int), fk
 # * name (str)
-# * keywords (varchar or TEXT[])    *right now keywords is a tokenized list but we may need to concatenate them to use Full-text search
+# * keywords (TEXT[])    
 
 # ShelfLives (per Ingredient):
 # * id (int), pk
@@ -119,7 +131,7 @@ async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
         FROM ingredient as i 
         JOIN categories as c on c.id = i.id 
         JOIN shelflives as sl on sl.fk_id = i.id  
-        where id = :id;
+        where i.id = :id;
     """
 
     results = db.execute(query, {"id": food_id}).fetchall

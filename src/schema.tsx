@@ -1,6 +1,5 @@
 import * as SQLite from 'expo-sqlite';
 
-
 interface Ingredient {
 	name: String;
 	id: Number;
