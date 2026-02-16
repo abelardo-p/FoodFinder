@@ -62,7 +62,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
     FROM ingredient 
     WHERE keywords @> ARRAY[:item];
     """
-
+    item = item.split()
     results = db.execute(query, {"item": item}).fetchall
 
     print(f'Result: {results}')
