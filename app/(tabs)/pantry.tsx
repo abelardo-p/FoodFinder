@@ -9,21 +9,28 @@ type Item = {
   id: string;
   name: string;
 }
-
-// const data: Item[] = [
-//   {id: '1', name: 'apple'},
-//   {id: '2', name: 'banana'},
-//   {id: '3', name: 'bread'},
-//   {id: '4', name: 'potato'},
-//   {id: '5', name: 'hamburger'},
-//   {id: '6', name: 'soup'},
-//   {id: '7', name: 'apple'},
-//   {id: '8', name: 'banana'},
-//   {id: '9', name: 'bread'},
-//   {id: '10', name: 'potato'},
-//   {id: '11', name: 'hamburger'},
-//   {id: '12', name: 'soup'},
-// ];
+const data: Item[] = [
+  { id: '1', name: 'Tomato' },
+  { id: '2', name: 'Onion' },
+  { id: '3', name: 'Garlic' },
+  { id: '4', name: 'Salt' },
+  { id: '5', name: 'Pepper' },
+  { id: '6', name: 'Olive Oil' },
+  { id: '7', name: 'Butter' },
+  { id: '8', name: 'Basil' },
+  { id: '9', name: 'Oregano' },
+  { id: '10', name: 'Parsley' },
+  { id: '11', name: 'Chicken' },
+  { id: '12', name: 'Beef' },
+  { id: '13', name: 'Pork' },
+  { id: '14', name: 'Carrot' },
+  { id: '15', name: 'Potato' },
+  { id: '16', name: 'Cheese' },
+  { id: '17', name: 'Milk' },
+  { id: '18', name: 'Egg' },
+  { id: '19', name: 'Flour' },
+  { id: '20', name: 'Sugar' },
+];
 
 const cardElement = (text: string) => {
   return (
@@ -32,9 +39,9 @@ const cardElement = (text: string) => {
     </Text>
   )
 }
-const dataElement = (text: string) => {
+const dataElement = (text: string, onPress: () => void) => {
   return (
-    <Pressable style={{ justifyContent: 'center', alignItems: 'center', margin: 12}}>
+    <Pressable onPress={onPress}style={{ justifyContent: 'center', alignItems: 'center', margin: 12}}>
       <Text style={{fontSize: 16}}>
         {text}
       </Text>
@@ -45,21 +52,20 @@ const dataElement = (text: string) => {
 export default function Index() {
   const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
+  const [isGroupSelected, setGroupSelected] = useState(false);
+  const [isCatSelected, setCatSelected] = useState(false);
+  const [items, setItems] = useState<Item[]>(data);
   const [activeId, setActiveId] = useState<string | null>(null);
 
 
-  useEffect(() => {
-
-	const fetchItems = async () => {
-		const foodItems = await dbFunctions.fetchItemsForPantry(db);
-		console.log(foodItems);
-		setItems((foodItems as Item[]) ?? []);
-	};
-
-	fetchItems();
-  }, []);
-
+  const handleGroupPress = () => {
+    setGroupSelected(true);
+  }
+  const handleCatPress = () => {
+    setFocus(false);
+    setGroupSelected(false);
+    setCatSelected(false);
+  }
 
   const handleLongPress = (id: string) => {
     setActiveId(id);
@@ -89,26 +95,49 @@ export default function Index() {
         containerStyle={{}} 
         searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
         onChange={() => {}}
-        onFocus={() => {setFocus(!isFocus)}}
-        onBlur={() => {setFocus(!isFocus)}}
+        onFocus={() => {setFocus(true)}}
+        onBlur={() => {}}
       >
       </SearchBar>
+
       {isFocus ? (
-        <FlatList
+        <View style={{flexDirection: 'row'}}>
+          <FlatList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item } ) => (
-            dataElement(item.name)
+            dataElement(item.name, handleGroupPress)
           )}
           style={{ shadowColor: '#000',
                   shadowOffset: { width: 1, height: 4 },
                   shadowOpacity: 0.2,
                   shadowRadius: 6,
-                  maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, padding: 10, backgroundColor: 'snow'}}
+                  maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
+
+        {isGroupSelected && !isCatSelected ? (
+          <FlatList
+            data={items}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item } ) => (
+              dataElement(item.name, handleCatPress)
+            )}
+            style={{ shadowColor: '#000',
+                    shadowOffset: { width: 1, height: 4 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 6,
+                    maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        ) : (<View></View>)}
+        </View>
+
+
       ) : (<View style={{margin: 15}}></View>)}
+
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
