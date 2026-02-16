@@ -37,17 +37,6 @@ def get_db():
     finally:
         db.close() 
 
-todos = [
-    {
-        "id": "1",
-        "item": "Get Omomo."
-    },
-    {
-        "id": "2",
-        "item": "Skip 125."
-    },
-]
-
 # It's a POST request since we're just checking if item is valid
 # Returns a list of results based on how many items are queries from the keywords
 @app.post("/search", tags=["pantry"])
@@ -58,19 +47,19 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
     # They choose which actual item they want from the frontend, from there, item id is passed back to
     # the backend and then we get the right item for them
     query = """
-    SELECT name, id 
+    SELECT id, name, keywords
     FROM ingredient 
     WHERE keywords @> ARRAY[:item];
     """
-
-    results = db.execute(query, {"item": item}).fetchall
-
+    item = item.split()
+    results = db.execute(query, {"item": item}).fetchall()
     print(f'Result: {results}')
 
     if not results:
         return { "status" : "err"}
     
-    return { "item" : 'omomo' }
+    formatted = format_item_results(results)
+    return {"status": "ok", "results": formatted}
 
 
 # SQL LITE Database:
@@ -128,11 +117,6 @@ async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
     print(f'Results: {results}')
 
     return {}
-
-
-@app.get("/todo", tags=["todos"])
-async def get_todos() -> dict:
-    return { "data": todos }
 
 
 @app.get("/", tags=["root"])

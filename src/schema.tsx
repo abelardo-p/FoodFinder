@@ -79,6 +79,7 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 		);
   	`);
 
+	// insertIntoFoodItem(db);
 	printTable(db);
 
 }
