@@ -1,4 +1,5 @@
 from collections import defaultdict
+
 from krovetzstemmer import Stemmer
 
 ks = Stemmer()

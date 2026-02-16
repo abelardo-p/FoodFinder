@@ -6,31 +6,31 @@ import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Item = {
-  id: string;
+  id: number;
   name: string;
 }
-const data: Item[] = [
-  { id: '1', name: 'Tomato' },
-  { id: '2', name: 'Onion' },
-  { id: '3', name: 'Garlic' },
-  { id: '4', name: 'Salt' },
-  { id: '5', name: 'Pepper' },
-  { id: '6', name: 'Olive Oil' },
-  { id: '7', name: 'Butter' },
-  { id: '8', name: 'Basil' },
-  { id: '9', name: 'Oregano' },
-  { id: '10', name: 'Parsley' },
-  { id: '11', name: 'Chicken' },
-  { id: '12', name: 'Beef' },
-  { id: '13', name: 'Pork' },
-  { id: '14', name: 'Carrot' },
-  { id: '15', name: 'Potato' },
-  { id: '16', name: 'Cheese' },
-  { id: '17', name: 'Milk' },
-  { id: '18', name: 'Egg' },
-  { id: '19', name: 'Flour' },
-  { id: '20', name: 'Sugar' },
-];
+// const data: Item[] = [
+//   { id: '1', name: 'Tomato' },
+//   { id: '2', name: 'Onion' },
+//   { id: '3', name: 'Garlic' },
+//   { id: '4', name: 'Salt' },
+//   { id: '5', name: 'Pepper' },
+//   { id: '6', name: 'Olive Oil' },
+//   { id: '7', name: 'Butter' },
+//   { id: '8', name: 'Basil' },
+//   { id: '9', name: 'Oregano' },
+//   { id: '10', name: 'Parsley' },
+//   { id: '11', name: 'Chicken' },
+//   { id: '12', name: 'Beef' },
+//   { id: '13', name: 'Pork' },
+//   { id: '14', name: 'Carrot' },
+//   { id: '15', name: 'Potato' },
+//   { id: '16', name: 'Cheese' },
+//   { id: '17', name: 'Milk' },
+//   { id: '18', name: 'Egg' },
+//   { id: '19', name: 'Flour' },
+//   { id: '20', name: 'Sugar' },
+// ];
 
 const cardElement = (text: string) => {
   return (
@@ -55,7 +55,7 @@ export default function Index() {
   const [isGroupSelected, setGroupSelected] = useState(false);
   const [isCatSelected, setCatSelected] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setSearchResults] = useState([]);
 
@@ -83,8 +83,17 @@ export default function Index() {
 	const timeoutId = setTimeout(async () => {
 		if (searchQuery.length >= 3) {
 			try {
-				const response = await fetch(`http://localhost:8000/search?item=${searchQuery}`);
-				const data = await response.json();
+        console.log(searchQuery)
+				const response = await fetch(`http://localhost:8000/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ item: searchQuery })
+        });
+
+        const data = await response.json();
+
         if (!data) return [];
 				setSearchResults(data);
 			} catch (error) {
@@ -108,7 +117,7 @@ export default function Index() {
     setCatSelected(false);
   }
 
-  const handleLongPress = (id: string) => {
+  const handleLongPress = (id: number) => {
     setActiveId(id);
 
     setTimeout(() => {

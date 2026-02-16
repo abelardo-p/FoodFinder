@@ -1,17 +1,26 @@
 import os
 
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
 import sqlalchemy
+from fastapi import Body, Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
-from backend.app.format_results import format_items
+
+from .format_results import format_item_results, format_items
+
+
+class SearchSchema(BaseModel):
+    item: str
+    
 
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
 port = 5432 
 
-DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
+# DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
+DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
+
 
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
 Session = sessionmaker(autocommit=False, autoflush=True, bind=engine)
@@ -54,20 +63,25 @@ def format_item_results(rows: list[sqlalchemy.engine.Row]):
 # It's a POST request since we're just checking if item is valid
 # Returns a list of results sized based on how many items are queried from the keywords
 @app.post("/search", tags=["pantry"])
-async def search_item(item: str, db = Depends(get_db)) -> dict:
-    query = """
+async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
+    query = text("""
     SELECT id, name, keywords
     FROM ingredient 
-    WHERE keywords @> ARRAY[:item];
-    """
-    item = item.split()
-    results = db.execute(query, {"item": item}).fetchall()
+    WHERE keywords @> :item;
+    """)
+    
+    item_list = data.item.split()
+    item_list = [word.lower() for word in item_list]
+
+    print(item_list)
+    results = db.execute(query, {"item": item_list}).fetchall()
     print(f'Result: {results}')
 
     if not results:
         return { "status" : "err"}
     
-    formatted = format_item_results(results)
+    formatted = format_items(format_item_results(results))
+    print(formatted)
     return {"status": "ok", "results": formatted}
 
 
@@ -109,7 +123,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
 # * subcategory (varchar)
 
 @app.get("/add_item", tags=["pantry"])
-async def add_item_to_pantry_list(food_id: str, db = Depends(get_db)) -> dict:
+async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
 
 
     query = """
