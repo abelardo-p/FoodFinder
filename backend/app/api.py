@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from format_results import format_items
+from backend.app.format_results import format_items
 
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
