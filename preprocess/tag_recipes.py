@@ -90,14 +90,13 @@ def categorize_recipes(recipes_directory_path: str, recipe_to_ingredients: dict,
         category: f"{CATEGORY_DESCRIPTIONS[category]} {', '.join(OVERRIDES[category])}"
         for category in OVERRIDES
     }
-    
     category_embeddings = {
         category : embed_model.encode(category_embed_strs[category])
         for category in OVERRIDES
     }
     
     recipe_to_cat = defaultdict(str)
-    for filename in os.listdir(recipes_directory_path):
+    for i, filename in enumerate(os.listdir(recipes_directory_path)):
 
         filepath = os.path.join(recipes_directory_path, filename)
         with open(filepath, "r", newline="", encoding="utf-8") as f:
@@ -108,7 +107,7 @@ def categorize_recipes(recipes_directory_path: str, recipe_to_ingredients: dict,
                 if not row:
                     continue
                 id = int(row[0])
-                title = row[1]
+                title = row[1] # TODO: CLEAN THE NAME (for ex: get rid of captions in parenthesis conditionally)
 
                 primary_category = None
                 secondary_category = None
@@ -116,17 +115,16 @@ def categorize_recipes(recipes_directory_path: str, recipe_to_ingredients: dict,
                 for category in OVERRIDES:
                     if contains_override(title, OVERRIDES[category]):
                         primary_category = category
+                        break
 
                 if not primary_category:
                     ingredients = recipe_to_ingredients[id][:NUM_KEPT_INGREDIENTS]
-                    if len(ingredients) < 5:
-                        embed_str = title
-                    else:
-                        embed_str = f"{title}. Ingredients: {', '.join(ing.lower() for ing in ingredients)}"
+                    embed_str = f"{title}. Ingredients: {', '.join(ing.lower() for ing in ingredients)}"
 
                     recipe_embedded = embed_model.encode(embed_str)
-                    sim_scores = {category : util.cos_sim(recipe_embedded, category_embeddings[category]) 
-                                  for category in category_embeddings}
+                    sim_scores = {
+                        category : util.cos_sim(recipe_embedded, category_embeddings[category].item()) 
+                        for category in category_embeddings}
                     sim_scores = sorted(sim_scores.items(), key=lambda pair : pair[1], reverse=True)
 
                     if abs(sim_scores[0][1] - sim_scores[1][1]) <= SIM_THRESH:
@@ -134,10 +132,17 @@ def categorize_recipes(recipes_directory_path: str, recipe_to_ingredients: dict,
 
                     primary_category = sim_scores[0][0]
 
-                print(id, title, primary_category, secondary_category)
                 recipe_to_cat[id] = [primary_category, secondary_category]
-    
-    return recipe_to_cat
+
+            os.makedirs("recipe_meal_categories", exist_ok=True)
+            with open(f"data/recipe_meal_categories/{i}.csv", "w", newline="", encoding="utf-8") as output_file:
+                writer = csv.writer(output_file)
+                writer.writerow(["RecipeID", "PrimaryCategory", "SecondaryCategory"])
+                for rid, (primary, secondary) in recipe_to_cat.items():
+                    writer.writerow([rid, primary, secondary])
+
+            recipe_to_cat.clear()
+
 
 if __name__ == '__main__':
     recipes_to_ingredients = build_recipe_ingredient_map (
@@ -145,15 +150,16 @@ if __name__ == '__main__':
                                 ingredients_path='data/ingredients/foodkeeper_items.csv')
     
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    recipes_tagged = categorize_recipes(recipes_directory_path='data/recipes',
-                       recipe_to_ingredients=recipes_to_ingredients,
-                       embed_model=embedding_model)
+    categorize_recipes(recipes_directory_path='data/recipes',
+                        recipe_to_ingredients=recipes_to_ingredients,
+                        embed_model=embedding_model)
     
-    with open('data/recipe_meal_categories.csv', 'w', newline='') as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=recipes_tagged.keys())
-        writer.writeheader()
-        writer.writerow(recipes_tagged)
 
 
-
-            
+    """" 
+    Heuristic for generating embedding string: IF recipe title ( caption ) contains "minutes", "serves", 
+    or doesn't contain ANY ingredient (as defined as inside USDA ingredient table), remove it. 
+    Basically we want to remove captions that don't describe what the dish is actually composed of
+    (i.e. ones that explain how good the dish is, where its from, or preparation time stats). 
+    Also we should remove stopwords.
+    """

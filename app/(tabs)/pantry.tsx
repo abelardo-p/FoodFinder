@@ -108,7 +108,6 @@ export default function Index() {
     setCatSelected(false);
   }
 
-
   const handleLongPress = (id: string) => {
     setActiveId(id);
 
