@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from format_results import format_items
+from backend.app.format_results import format_items
 
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
@@ -74,7 +74,7 @@ async def search_item(item: str, db = Depends(get_db)) -> dict:
     FROM ingredient 
     WHERE keywords @> ARRAY[:item];
     """
-
+    item = item.split()
     results = db.execute(query, {"item": item}).fetchall()
     print(f'Result: {results}')
 
