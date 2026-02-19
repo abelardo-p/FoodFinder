@@ -1,6 +1,6 @@
 from collections import defaultdict
 from krovetzstemmer import Stemmer
-from sqlalchemy import ARRAY, String, bindparam, create_engine, text
+import sqlalchemy
 
 ks = Stemmer()
 

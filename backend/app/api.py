@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from format_results import format_item_results, format_items
+from format_results import *
 
 
 class SearchSchema(BaseModel):
