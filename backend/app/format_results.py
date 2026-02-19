@@ -1,8 +1,21 @@
 from collections import defaultdict
-
 from krovetzstemmer import Stemmer
+from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 
 ks = Stemmer()
+
+def format_item_results(rows: list[sqlalchemy.engine.Row]):
+    """Formats & deduplicates ingredient names/keywords returned by a keyword-search query"""
+    ingredients_to_keywords = {}
+    # Group ingredients with the same name together
+    for row in rows:
+        d = row._asdict()
+        name = d["name"].lower()
+        ing_id = int(d["id"])
+        ing_keywords = d["keywords"] or []
+        ingredients_to_keywords[name][ing_id] = list(ing_keywords)
+
+    return format_items(ingredients_to_keywords)
 
 def format_items(ingredients_to_keywords: dict[str, dict[int, list[str]]]):
     """For each ingredient name-group: remove name tokens; hide group-common tokens; keep remaining as display keywords."""

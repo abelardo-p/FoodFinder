@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from .format_results import format_item_results, format_items
+from format_results import format_item_results, format_items
 
 
 class SearchSchema(BaseModel):
@@ -46,19 +46,6 @@ def get_db():
     finally:
         db.close() 
 
-
-def format_item_results(rows: list[sqlalchemy.engine.Row]):
-    """Formats & deduplicates ingredient names/keywords returned by a keyword-search query"""
-    ingredients_to_keywords = {}
-    # Group ingredients with the same name together
-    for row in rows:
-        d = row._asdict()
-        name = d["name"].lower()
-        ing_id = int(d["id"])
-        ing_keywords = d["keywords"] or []
-        ingredients_to_keywords[name][ing_id] = list(ing_keywords)
-
-    return format_items(ingredients_to_keywords)
 
 # It's a POST request since we're just checking if item is valid
 # Returns a list of results sized based on how many items are queried from the keywords

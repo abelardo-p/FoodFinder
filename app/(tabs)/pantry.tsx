@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Item = {
-  id: number;
+  id: string;
   name: string;
 }
 const data: Item[] = [
@@ -41,7 +41,7 @@ const cardElement = (text: string) => {
 }
 const dataElement = (text: string, onPress: () => void) => {
   return (
-    <Pressable onPress={onPress}style={{ justifyContent: 'center', alignItems: 'center', margin: 12}}>
+    <Pressable onPress={onPress} style={{ justifyContent: 'center', alignItems: 'center', margin: 12}}>
       <Text style={{fontSize: 16}}>
         {text}
       </Text>
@@ -49,64 +49,61 @@ const dataElement = (text: string, onPress: () => void) => {
   )
 }
 
-export default function Index() {
+export default function Pantry() {
   const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
   const [isCatSelected, setCatSelected] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [items, setItems] = useState<Item[]>(data);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setSearchResults] = useState([]);
 
 
-  useEffect(() => {
+  // const fetchItems = async () => {
+	// 	const foodItems = await dbFunctions.fetchItemsForPantry(db);
+	// 	console.log(foodItems);
+	// 	setItems((foodItems as Item[]) ?? []);
+	// };
+  // useEffect(() => { 
+	//   fetchItems();
+  // }, []);
 
-	const fetchItems = async () => {
-		const foodItems = await dbFunctions.fetchItemsForPantry(db);
-		console.log(foodItems);
-		setItems((foodItems as Item[]) ?? []);
-	};
+  // useEffect(() => {
+	// // Don't search if below minimum length
+	// if (searchQuery.length > 0 && searchQuery.length < 3) {
+		// setSearchResults([]);
+	// 	return;
+	// }
 
-	fetchItems();
-  	}, 
-	[]
-  );
+	// const timeoutId = setTimeout(async () => {
+	// 	if (searchQuery.length >= 3) {
+	// 		try {
+  //       console.log(searchQuery)
+	// 			const response = await fetch(`http://localhost:8000/search`, {
+  //           method: 'POST',
+  //           headers: {
+  //               'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify({ item: searchQuery })
+  //       });
 
-  useEffect(() => {
-	// Don't search if below minimum length
-	if (searchQuery.length > 0 && searchQuery.length < 3) {
-		setSearchResults([]);
-		return;
-	}
+  //       const data = await response.json();
 
-	const timeoutId = setTimeout(async () => {
-		if (searchQuery.length >= 3) {
-			try {
-        console.log(searchQuery)
-				const response = await fetch(`http://localhost:8000/search`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ item: searchQuery })
-        });
+  //       if (!data) return [];
+	// 			setSearchResults(data);
+	// 		} catch (error) {
+  //       console.error('Search failed:', error);
+  //       setSearchResults([]);
+	// 		}
+	// 	} else {
+	// 		setSearchResults([]);
+	// 	}
+	// }, 2000); 
 
-        const data = await response.json();
-
-        if (!data) return [];
-				setSearchResults(data);
-			} catch (error) {
-        console.error('Search failed:', error);
-        setSearchResults([]);
-			}
-		} else {
-			setSearchResults([]);
-		}
-	}, 2000); 
-
-	return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+	// return () => clearTimeout(timeoutId);
+  // }, [searchQuery]);
   
   const handleGroupPress = () => {
     setGroupSelected(true);
@@ -117,7 +114,7 @@ export default function Index() {
     setCatSelected(false);
   }
 
-  const handleLongPress = (id: number) => {
+  const handleLongPress = (id: string) => {
     setActiveId(id);
 
     setTimeout(() => {
@@ -126,10 +123,10 @@ export default function Index() {
       );
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
-	  dbFunctions.deleteItemFromDB(id, db);
+	  // dbFunctions.deleteItemFromDB(id, db);
     }, 300);
 
-	dbFunctions.printTable(db);
+	// dbFunctions.printTable(db);
   };
 
   return (
@@ -153,32 +150,25 @@ export default function Index() {
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
           <FlatList
-          data={results}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item } ) => (
-            dataElement(item.name, handleGroupPress)
-          )}
-          style={{ shadowColor: '#000',
-                  shadowOffset: { width: 1, height: 4 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 6,
-                  maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
-          showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item } ) => (
+              dataElement(item.name, handleGroupPress)
+            )}
+            style={styles.pantryStyle}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={styles.separator} 
+          />}
         />
 
         {isGroupSelected && !isCatSelected ? (
           <FlatList
-            data={results}
+            data={data}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
               dataElement(item.name, handleCatPress)
             )}
-            style={{ shadowColor: '#000',
-                    shadowOffset: { width: 1, height: 4 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 6,
-                    maxHeight: 450, width: 225, borderRadius: 11, borderWidth: 3, margin: 10, marginLeft: 3, marginRight: 3, padding: 10, backgroundColor: 'snow'}}
+            style={styles.pantryStyle}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
@@ -209,6 +199,21 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+  pantryStyle: {
+    shadowColor: '#000',
+    shadowOffset: { width: 1, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    maxHeight: 450,
+    width: 225,
+    borderRadius: 11,
+    borderWidth: 3,
+    margin: 10,
+    marginLeft: 3,
+    marginRight: 3,
+    padding: 10,
+    backgroundColor: 'snow'
+  },
   separator: {
     backgroundColor: 'grey',
     marginHorizontal: 20,
