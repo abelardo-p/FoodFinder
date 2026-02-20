@@ -1,6 +1,7 @@
 from collections import defaultdict
-from krovetzstemmer import Stemmer
+
 import sqlalchemy
+from krovetzstemmer import Stemmer
 
 ks = Stemmer()
 

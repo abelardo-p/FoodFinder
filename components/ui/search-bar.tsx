@@ -13,8 +13,6 @@ export default function SearchBar({onChange, onFocus, onBlur, containerStyle, se
   const [text, setText] = useState(''); 
 
 
-
-
   return (
     <View style={[containerStyle, containerStyle]}>
       <TextInput

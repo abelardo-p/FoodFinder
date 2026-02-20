@@ -2,13 +2,12 @@ import json
 import os
 
 import sqlalchemy
+from app.format_results import *
 from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
-
-from .format_results import format_item_results, format_items
 
 
 class SearchSchema(BaseModel):
@@ -73,7 +72,7 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
     if not results:
         return { "status" : "err"}
     
-    formatted = convert_sets_to_lists(format_items(format_item_results(results)))
+    formatted = convert_sets_to_lists(format_item_results(results))
     json_string = json.dumps(formatted)
     print(json_string)
     return {"status": "ok", "results": json_string}
