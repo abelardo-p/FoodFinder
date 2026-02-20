@@ -12,24 +12,7 @@ type Item = {
 const data: Item[] = [
   { id: '1', name: 'Tomato' },
   { id: '2', name: 'Onion' },
-  { id: '3', name: 'Garlic' },
-  { id: '4', name: 'Salt' },
-  { id: '5', name: 'Pepper' },
-  { id: '6', name: 'Olive Oil' },
-  { id: '7', name: 'Butter' },
-  { id: '8', name: 'Basil' },
-  { id: '9', name: 'Oregano' },
-  { id: '10', name: 'Parsley' },
-  { id: '11', name: 'Chicken' },
-  { id: '12', name: 'Beef' },
-  { id: '13', name: 'Pork' },
-  { id: '14', name: 'Carrot' },
-  { id: '15', name: 'Potato' },
-  { id: '16', name: 'Cheese' },
-  { id: '17', name: 'Milk' },
-  { id: '18', name: 'Egg' },
-  { id: '19', name: 'Flour' },
-  { id: '20', name: 'Sugar' },
+  { id: '3', name: 'Garlic' }
 ];
 
 const cardElement = (text: string) => {
@@ -61,49 +44,53 @@ export default function Pantry() {
   const [results, setSearchResults] = useState([]);
 
 
-  // const fetchItems = async () => {
-	// 	const foodItems = await dbFunctions.fetchItemsForPantry(db);
-	// 	console.log(foodItems);
-	// 	setItems((foodItems as Item[]) ?? []);
-	// };
-  // useEffect(() => { 
-	//   fetchItems();
-  // }, []);
+  const fetchItems = async () => {
+    const foodItems = await dbFunctions.fetchItemsForPantry(db);
+    console.log(foodItems);
+    setItems((foodItems as Item[]) ?? []);
+	};
+  
+  useEffect(() => { 
+	   fetchItems();
+  }, []);
 
-  // useEffect(() => {
-	// // Don't search if below minimum length
-	// if (searchQuery.length > 0 && searchQuery.length < 3) {
-		// setSearchResults([]);
-	// 	return;
-	// }
+  useEffect(() => {
+    // Don't search if below minimum length
+    if (searchQuery.length > 0 && searchQuery.length < 3) {
+      setSearchResults([]);
+      return;
+    }
 
-	// const timeoutId = setTimeout(async () => {
-	// 	if (searchQuery.length >= 3) {
-	// 		try {
-  //       console.log(searchQuery)
-	// 			const response = await fetch(`http://localhost:8000/search`, {
-  //           method: 'POST',
-  //           headers: {
-  //               'Content-Type': 'application/json',
-  //           },
-  //           body: JSON.stringify({ item: searchQuery })
-  //       });
+    const timeoutId = setTimeout(async () => {
+      if (searchQuery.length >= 3) {
+        try {
+          console.log(searchQuery)
+          const response = await fetch(`http://localhost:8000/search`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ item: searchQuery })
+          });
 
-  //       const data = await response.json();
+          const data = await response.json();
 
-  //       if (!data) return [];
-	// 			setSearchResults(data);
-	// 		} catch (error) {
-  //       console.error('Search failed:', error);
-  //       setSearchResults([]);
-	// 		}
-	// 	} else {
-	// 		setSearchResults([]);
-	// 	}
-	// }, 2000); 
+          console.log(data);
 
-	// return () => clearTimeout(timeoutId);
-  // }, [searchQuery]);
+          if (!data) return [];
+
+          setSearchResults(data);
+        } catch (error) {
+          console.error('Search failed:', error);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 2000); 
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
   
   const handleGroupPress = () => {
     setGroupSelected(true);
@@ -123,10 +110,10 @@ export default function Pantry() {
       );
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
-	  // dbFunctions.deleteItemFromDB(id, db);
+	  dbFunctions.deleteItemFromDB(Number(id), db);
     }, 300);
 
-	// dbFunctions.printTable(db);
+	dbFunctions.printTable(db);
   };
 
   return (
@@ -150,8 +137,8 @@ export default function Pantry() {
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
           <FlatList
-            data={data}
-            keyExtractor={(item) => item.id}
+            data={items}
+            keyExtractor={(item) => item.id} // keyExtractor wants a string! not a number
             renderItem={({ item } ) => (
               dataElement(item.name, handleGroupPress)
             )}
@@ -163,7 +150,7 @@ export default function Pantry() {
 
         {isGroupSelected && !isCatSelected ? (
           <FlatList
-            data={data}
+            data={items}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
               dataElement(item.name, handleCatPress)
@@ -175,6 +162,9 @@ export default function Pantry() {
         ) : (<View></View>)}
         </View>
 
+      // Show results to user so user can pick from there, and then based on what user chooses,
+      // do another api call so that we add the right item to the pantry list 
+      // (from there, query database and update) 
 
       ) : (<View style={{margin: 15}}></View>)}
 

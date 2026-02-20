@@ -119,19 +119,21 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
 async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
 
 
-    query = """
+    query = text("""
         SELECT name, i.id, broad_category, storage, min_days, max_days 
         FROM ingredient as i 
         JOIN categories as c on c.id = i.id 
         JOIN shelflives as sl on sl.fk_id = i.id  
         where i.id = :id;
-    """
+    """)
+
     results = db.execute(query, {"id": food_id}).fetchall
-
-
     print(f'Results: {results}')
 
-    return {}
+    json_string = json.dumps(results)
+
+    # Make a function to conver
+    return {"status": "ok", "results": json_string}
 
 
 @app.get("/", tags=["root"])
