@@ -7,8 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from format_results import *
-
+from app.format_results import *
 
 class SearchSchema(BaseModel):
     item: str
@@ -67,7 +66,7 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
     if not results:
         return { "status" : "err"}
     
-    formatted = format_items(format_item_results(results))
+    formatted = format_item_results(results)
     print(formatted)
     return {"status": "ok", "results": formatted}
 
