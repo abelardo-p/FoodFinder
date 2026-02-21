@@ -20,6 +20,24 @@ def convert_sets_to_lists(data):
         result[key] = {item_id: list(keywords) for item_id, keywords in value.items()}
     return result
 
+
+def extract_general(data: dict) -> dict:
+    general = {}
+    cleaned = {}
+    
+    for category, items in data.items():
+        cleaned_items = {}
+        for key, tags in items.items():
+            if not tags:
+                general[key] = [category]
+            else:
+                cleaned_items[key] = tags
+        if cleaned_items:
+            cleaned[category] = cleaned_items
+    
+    cleaned["_general"] = general
+    return cleaned
+
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
 port = 5432 
@@ -67,12 +85,17 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
 
     print(item_list)
     results = db.execute(query, {"item": item_list}).fetchall()
+
+    
+    
     print(f'Result: {results}')
 
     if not results:
         return { "status" : "err"}
     
     formatted = convert_sets_to_lists(format_item_results(results))
+    with_general_category = extract_general(formatted)
+    print(f'Results with gen: {with_general_category}')
     json_string = json.dumps(formatted)
     print(json_string)
     return {"status": "ok", "results": json_string}
@@ -128,6 +151,7 @@ async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
     """)
 
     results = db.execute(query, {"id": food_id}).fetchall
+    
     print(f'Results: {results}')
 
     json_string = json.dumps(results)
