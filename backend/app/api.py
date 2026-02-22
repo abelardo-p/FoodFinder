@@ -17,8 +17,8 @@ username = os.getenv('USERNAME', default='postgres')
 ps_password = os.getenv('PS_PASSWORD', default='password')
 port = 5432 
 
-# DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
-DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
+DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
+# DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
 
 
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
