@@ -48,6 +48,47 @@ def format_item_results(rows: list[sqlalchemy.engine.Row]):
 
     return format_items(ingredients_to_keywords)
 
+def format_single_item_returned_from_id(rows: list[sqlalchemy.engine.Row]):
+    """Since postgres returns a list of tuples of each row, we format it so that id is key, and 
+    rest of attributes is a list of are values."""
+    """
+    [
+    ('Chicken', 517, 'Deli & Prepared Foods', 'FREEZER', 30, 60),
+    ('Chicken', 517, 'Deli & Prepared Foods', 'FRIDGE', 3, 5),
+    ('Chicken', 517, 'Deli & Prepared Foods', 'FRIDGE', 14, 14)
+    ]
+    into this:
+    {
+    517: {
+            'name': 'Chicken',
+            'category': 'Deli & Prepared Foods',
+            'storage': [
+            {'storage': 'FREEZER', 'min_days': 30, 'max_days': 60},
+            {'storage': 'FRIDGE', 'min_days': 3, 'max_days': 5},
+            {'storage': 'FRIDGE', 'min_days': 14, 'max_days': 14}
+            ]
+        }
+    }
+    """
+
+    foodItem = {}
+    
+    for name, id, category, storage, min_days, max_days in rows:
+        if id not in foodItem:
+            foodItem[id] = {
+                'name': name,
+                'category': category,
+                'storage_type': []
+            }
+        
+        foodItem[id]['storage_type'].append({
+            'storage': storage,
+            'min_days': min_days,
+            'max_days': max_days
+        })
+    
+    return foodItem
+
 # Test input:
 test_input = {
     "whole wheat bread": {

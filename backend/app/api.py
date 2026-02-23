@@ -93,9 +93,7 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
     if not results:
         return { "status" : "err"}
     
-    formatted = convert_sets_to_lists(format_item_results(results))
-    with_general_category = extract_general(formatted)
-    print(f'Results with gen: {with_general_category}')
+    formatted = extract_general(convert_sets_to_lists(format_item_results(results)))
     json_string = json.dumps(formatted)
     print(json_string)
     return {"status": "ok", "results": json_string}
@@ -145,18 +143,19 @@ async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
     query = text("""
         SELECT name, i.id, broad_category, storage, min_days, max_days 
         FROM ingredient as i 
-        JOIN categories as c on c.id = i.id 
-        JOIN shelflives as sl on sl.fk_id = i.id  
-        where i.id = :id;
+        JOIN categories as c on c.id = i.category_id 
+        JOIN shelflives as sl on sl.fk_id = i.id 
+        WHERE i.id = :id;
     """)
 
-    results = db.execute(query, {"id": food_id}).fetchall
+    results = db.execute(query, {"id": food_id}).fetchall()
     
-    print(f'Results: {results}')
+    formatted_results = format_single_item_returned_from_id(results)
+    print(f'Results: {formatted_results}')
 
-    json_string = json.dumps(results)
+    json_string = json.dumps(formatted_results)
 
-    # Make a function to conver
+    # Make a function to convert
     return {"status": "ok", "results": json_string}
 
 
