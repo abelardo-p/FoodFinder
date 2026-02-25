@@ -5,32 +5,38 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
 
+type ItemResults = {
+  id: string;
+  name: string;
+  category: string;
+}
+
 type Item = {
   id: string;
   name: string;
 }
-const data: Item[] = [
-  { id: '1', name: 'Tomato' },
-  { id: '2', name: 'Onion' },
-  { id: '3', name: 'Garlic' },
-  { id: '4', name: 'Salt' },
-  { id: '5', name: 'Pepper' },
-  { id: '6', name: 'Olive Oil' },
-  { id: '7', name: 'Butter' },
-  { id: '8', name: 'Basil' },
-  { id: '9', name: 'Oregano' },
-  { id: '10', name: 'Parsley' },
-  { id: '11', name: 'Chicken' },
-  { id: '12', name: 'Beef' },
-  { id: '13', name: 'Pork' },
-  { id: '14', name: 'Carrot' },
-  { id: '15', name: 'Potato' },
-  { id: '16', name: 'Cheese' },
-  { id: '17', name: 'Milk' },
-  { id: '18', name: 'Egg' },
-  { id: '19', name: 'Flour' },
-  { id: '20', name: 'Sugar' },
-];
+
+interface FoodData {
+  /*
+  {'chicken': 
+  {113: ['whole'], 
+  517: ['deli meat', 'pre-packaged', 'package', 'luncheon meat']}, 
+  'chicken parts': 
+  {116: ['breast halves', 'breast', 'bone', 'bone-in', 'half', 'halves'], 
+  117: ['breast halves', 'boneless', 'breast', 'bone', 'half', 'halves'], 
+  118: ['leg', 'thigh']}, 
+  '_general': 
+  {115: ['ground turkey or chicken'], 
+  131: ['stuffed, raw chicken breasts'], 
+  134: ['chicken nuggets, patties'], 
+  136: ['fried chicken'], 
+  141: ['rotisserie chicken'], 
+  142: ['canned chicken'], 
+  418: ['chicken salad']}}
+  */
+  [category: string]: Record<string, string[]>;
+}
+
 
 const cardElement = (text: string) => {
   return (
@@ -53,62 +59,115 @@ export default function Pantry() {
   const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isCatSelected, setCatSelected] = useState(false);
-  const [items, setItems] = useState<Item[]>(data);
+  const [items, setItems] = useState<Item[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [results, setSearchResults] = useState([]);
+  const [categories, setCategories] = useState<string[]>();
+  const [results, setSearchResults] = useState<ItemResults[]>([]);
+  const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
 
-
-  // const fetchItems = async () => {
-	// 	const foodItems = await dbFunctions.fetchItemsForPantry(db);
-	// 	console.log(foodItems);
-	// 	setItems((foodItems as Item[]) ?? []);
-	// };
-  // useEffect(() => { 
-	//   fetchItems();
-  // }, []);
-
-  // useEffect(() => {
-	// // Don't search if below minimum length
-	// if (searchQuery.length > 0 && searchQuery.length < 3) {
-		// setSearchResults([]);
-	// 	return;
-	// }
-
-	// const timeoutId = setTimeout(async () => {
-	// 	if (searchQuery.length >= 3) {
-	// 		try {
-  //       console.log(searchQuery)
-	// 			const response = await fetch(`http://localhost:8000/search`, {
-  //           method: 'POST',
-  //           headers: {
-  //               'Content-Type': 'application/json',
-  //           },
-  //           body: JSON.stringify({ item: searchQuery })
-  //       });
-
-  //       const data = await response.json();
-
-  //       if (!data) return [];
-	// 			setSearchResults(data);
-	// 		} catch (error) {
-  //       console.error('Search failed:', error);
-  //       setSearchResults([]);
-	// 		}
-	// 	} else {
-	// 		setSearchResults([]);
-	// 	}
-	// }, 2000); 
-
-	// return () => clearTimeout(timeoutId);
-  // }, [searchQuery]);
   
-  const handleGroupPress = () => {
+
+
+  const fetchItems = async () => {
+    const foodItems = await dbFunctions.fetchItemsForPantry(db);
+    console.log(foodItems);
+    setItems((foodItems as Item[]) ?? []);
+	};
+  
+  useEffect(() => { 
+	   fetchItems();
+  }, []);
+
+  useEffect(() => {
+    // Don't search if below minimum length
+    if (searchQuery.length > 0 && searchQuery.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      if (searchQuery.length >= 3) {
+        try {
+          console.log(searchQuery)
+          const response = await fetch(`http://localhost:8000/search`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ item: searchQuery })
+          });
+
+          
+          const data = await response.json();
+          if (!data) return [];
+
+          console.log(JSON.parse(data.results));
+
+          const dataResults = JSON.parse(data.results);
+
+          // Converting the weird json to an array-like in order to render for later functions
+          const formattedDataFromJson: ItemResults[] = Object.entries(dataResults).flatMap(([category, records]) =>
+          Object.entries(records as Record<number, string[]>).map(([id, keywords]) => ({
+              id,
+              name: Array.isArray(keywords) && keywords.length > 0 ? keywords.join(', ') : category,
+              category,
+            }))
+          );
+
+          console.log(formattedDataFromJson);
+          const cats = [...new Set(formattedDataFromJson.map(item => item.category))];
+
+          console.log(cats);
+
+          setCategories(cats);
+
+          setSearchResults(formattedDataFromJson);
+        } catch (error) {
+          console.error('Search failed:', error);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 2000); 
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+  
+  const handleGroupPress = (category: string, ) => {
     setGroupSelected(true);
+    const categoryItems = results.filter(item => item.category === category);
+    setCategoryItems(categoryItems);
+    console.log(categoryItems);
   }
-  const handleCatPress = () => {
+
+  const handleCatPress = async (foodId: string) => {
+    // Handle the other API call here and add to database!
+    // do another api call so that we add the right item to the pantry list 
+    // (from there, query database and update)
+
+    const url = `http://localhost:8000/add_item?food_id=${foodId}`;
+      
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    const data = await response.json();
+    const dataResults = JSON.parse(data.results);
+    
+
+    console.log(dataResults);
+
+    dbFunctions.insertIntoFoodItem(db, foodId, dataResults);
+    dbFunctions.printTable(db);
+
+
+    // Reset everything
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
@@ -123,10 +182,10 @@ export default function Pantry() {
       );
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
-	  // dbFunctions.deleteItemFromDB(id, db);
+	  dbFunctions.deleteItemFromDB(Number(id), db);
     }, 300);
 
-	// dbFunctions.printTable(db);
+	dbFunctions.printTable(db);
   };
 
   return (
@@ -150,10 +209,9 @@ export default function Pantry() {
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
           <FlatList
-            data={data}
-            keyExtractor={(item) => item.id}
+            data={categories}
             renderItem={({ item } ) => (
-              dataElement(item.name, handleGroupPress)
+              dataElement(item, () => handleGroupPress(item))
             )}
             style={styles.pantryStyle}
             showsVerticalScrollIndicator={false}
@@ -163,10 +221,10 @@ export default function Pantry() {
 
         {isGroupSelected && !isCatSelected ? (
           <FlatList
-            data={data}
+            data={subItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
-              dataElement(item.name, handleCatPress)
+              dataElement(item.name, () => handleCatPress(item.id))
             )}
             style={styles.pantryStyle}
             showsVerticalScrollIndicator={false}
@@ -174,7 +232,6 @@ export default function Pantry() {
           />
         ) : (<View></View>)}
         </View>
-
 
       ) : (<View style={{margin: 15}}></View>)}
 
@@ -192,7 +249,7 @@ export default function Pantry() {
           />
         )}
         showsVerticalScrollIndicator={false}
-      />  
+      />
 
     </View>
   );
