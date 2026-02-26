@@ -87,7 +87,7 @@ export default function Index() {
           <ItemCardCollapsible
             head={cardElement(item.name)}
             onPress={() => {}}
-            pressableStyle={{margin: 5, minHeight: 80, minWidth: 225  , maxWidth: 250, borderWidth: 0, borderRadius: 15}}
+            pressableStyle={{margin: 5, minHeight: 80, width:250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
           >
             <Text style={{marginTop: 0, margin: 15}}>{item.ingredients.join(", ")}</Text>
           </ItemCardCollapsible>

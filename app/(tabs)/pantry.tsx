@@ -178,6 +178,7 @@ export default function Pantry() {
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
+    fetchItems();
   }
 
   const handleLongPress = (id: string) => {
@@ -270,6 +271,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     maxHeight: 450,
     width: 225,
+    maxWidth: 225,
     borderRadius: 11,
     borderWidth: 3,
     margin: 10,
