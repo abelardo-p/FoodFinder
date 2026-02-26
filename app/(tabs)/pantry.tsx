@@ -5,6 +5,13 @@ import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
 
+
+const machineIP: string = 'localhost';
+const emulatorIP: string = '10.0.2.2'
+
+const currentMachineIP: string = emulatorIP
+
+
 type ItemResults = {
   id: string;
   name: string;
@@ -93,7 +100,7 @@ export default function Pantry() {
       if (searchQuery.length >= 3) {
         try {
           console.log(searchQuery)
-          const response = await fetch(`http://localhost:8000/search`, {
+          const response = await fetch(`http://${currentMachineIP}:8000/search`, {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json',
@@ -150,7 +157,7 @@ export default function Pantry() {
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
 
-    const url = `http://localhost:8000/add_item?food_id=${foodId}`;
+    const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
       
     const response = await fetch(url, {
       method: 'GET',

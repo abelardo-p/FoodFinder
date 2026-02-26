@@ -52,7 +52,7 @@ Session = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 app = FastAPI()
 
 # Allows calls from:
-origins = ["http://localhost:8081"]
+origins = ["http://localhost"]
 
 app.add_middleware(
     CORSMiddleware,
