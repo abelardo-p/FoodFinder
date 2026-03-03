@@ -9,7 +9,7 @@ import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "re
 const machineIP: string = 'localhost';
 const emulatorIP: string = '10.0.2.2'
 
-const currentMachineIP: string = emulatorIP
+const currentMachineIP: string = machineIP  
 
 
 type ItemResults = {
