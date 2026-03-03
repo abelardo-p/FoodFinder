@@ -13,37 +13,13 @@ from sqlalchemy.orm import sessionmaker
 class SearchSchema(BaseModel):
     item: str
 
-def convert_sets_to_lists(data):
-    """Convert all sets in nested dict to lists"""
-    result = {}
-    for key, value in data.items():
-        result[key] = {item_id: list(keywords) for item_id, keywords in value.items()}
-    return result
-
-
-def extract_general(data: dict) -> dict:
-    general = {}
-    cleaned = {}
-    
-    for category, items in data.items():
-        cleaned_items = {}
-        for key, tags in items.items():
-            if not tags:
-                general[key] = [category]
-            else:
-                cleaned_items[key] = tags
-        if cleaned_items:
-            cleaned[category] = cleaned_items
-    
-    cleaned["_general"] = general
-    return cleaned
-
 username = os.getenv('USERNAME', default='postgres') 
 ps_password = os.getenv('PS_PASSWORD', default='password')
+database = os.getenv('DATABASE', default='omomo')
 port = 5432 
 
-DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/foodfinder'
-# DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
+# DATABASE_URL = f'postgresql://{username}:{ps_password}@localhost:{port}/{database}'
+DATABASE_URL = f'postgresql://postgres:password@localhost:{port}/omomo'
 
 
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
@@ -70,10 +46,10 @@ def get_db():
     finally:
         db.close() 
 
-# It's a POST request since we're just checking if item is valid
-# Returns a list of results sized based on how many items are queried from the keywords
+
 @app.post("/search", tags=["pantry"])
 async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
+    """Returns a list of results sized based on how many items are queried from the keywords"""
     query = text("""
     SELECT id, name, keywords
     FROM ingredient 
@@ -99,46 +75,11 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
     return {"status": "ok", "results": json_string}
 
 
-# SQL LITE Database:
-
-# Food Item Table:
-# varchar broad_category
-# varchar subcategory
-# enum storage
-# int min_days
-# int max_days
-# varchar name
-# int FoodId (pk)
-
-# (These are updated when user adds item or updates quantity)
-# int quantity
-# date purchased
-# date opened
-
-
-# POPULATES FROM POSTGRESQL:
-# Ingredient (from USDA):
-# * id (int), pk
-# * category_id (int), fk
-# * name (str)
-# * keywords (TEXT[])    
-
-# ShelfLives (per Ingredient):
-# * id (int), pk
-# * storage (varchar) enum
-# * state (varchar) enum
-# * min_days (int)
-# * max_days (int)
-# * source (varchar)
-
-# Categories (from USDA):
-# * id (int), pk
-# * broad_category (varchar) 
-# * subcategory (varchar)
-
 @app.get("/add_item", tags=["pantry"])
 async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
-
+    """Retrieves all the necessary item information to add 
+    an item to the pantry list, including name, category, 
+    and storage info (storage type, min/max days) based on the food ID."""
 
     query = text("""
         SELECT name, i.id, broad_category, storage, min_days, max_days 
@@ -151,11 +92,11 @@ async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
     results = db.execute(query, {"id": food_id}).fetchall()
     
     formatted_results = format_single_item_returned_from_id(results)
-    print(f'Results: {formatted_results}')
+    
 
     json_string = json.dumps(formatted_results)
-
-    # Make a function to convert
+    print(f'Results: {json_string}')
+    
     return {"status": "ok", "results": json_string}
 
 

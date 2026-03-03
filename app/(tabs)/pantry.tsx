@@ -21,34 +21,15 @@ type ItemResults = {
 type Item = {
   id: string;
   name: string;
+  keyword: string;
+  quantity: number;
 }
 
-interface FoodData {
-  /*
-  {'chicken': 
-  {113: ['whole'], 
-  517: ['deli meat', 'pre-packaged', 'package', 'luncheon meat']}, 
-  'chicken parts': 
-  {116: ['breast halves', 'breast', 'bone', 'bone-in', 'half', 'halves'], 
-  117: ['breast halves', 'boneless', 'breast', 'bone', 'half', 'halves'], 
-  118: ['leg', 'thigh']}, 
-  '_general': 
-  {115: ['ground turkey or chicken'], 
-  131: ['stuffed, raw chicken breasts'], 
-  134: ['chicken nuggets, patties'], 
-  136: ['fried chicken'], 
-  141: ['rotisserie chicken'], 
-  142: ['canned chicken'], 
-  418: ['chicken salad']}}
-  */
-  [category: string]: Record<string, string[]>;
-}
-
-
-const cardElement = (text: string) => {
+const cardElement = (text: string, quantity: number, keyword: string) => {
+	console.log(text, quantity, keyword);
   return (
     <Text style={{marginLeft: 20, fontSize: 18}}>
-      {text}
+      {text} {quantity} {keyword}
     </Text>
   )
 }
@@ -140,7 +121,7 @@ export default function Pantry() {
       } else {
         setSearchResults([]);
       }
-    }, 2000); 
+    }, 500); 
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
@@ -152,7 +133,7 @@ export default function Pantry() {
     console.log(categoryItems);
   }
 
-  const handleCatPress = async (foodId: string) => {
+  const handleCatPress = async (foodId: string, keyword: string) => {
     // Handle the other API call here and add to database!
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
@@ -170,7 +151,10 @@ export default function Pantry() {
 
     console.log(dataResults);
 
-    dbFunctions.insertIntoFoodItem(db, foodId, dataResults);
+	// Update item quantity or add new item to database
+    await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
+
+
     dbFunctions.printTable(db);
 
 
@@ -178,7 +162,7 @@ export default function Pantry() {
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
-    fetchItems();
+    await fetchItems();
   }
 
   const handleLongPress = (id: string) => {
@@ -191,9 +175,10 @@ export default function Pantry() {
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
 	  dbFunctions.deleteItemFromDB(Number(id), db);
+	  dbFunctions.printTable(db);
     }, 300);
 
-	dbFunctions.printTable(db);
+	
   };
 
   return (
@@ -232,7 +217,7 @@ export default function Pantry() {
             data={subItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
-              dataElement(item.name, () => handleCatPress(item.id))
+              dataElement(item.name, () => handleCatPress(item.id, item.name)) // I GUESS ITEM.NAME IS THE KEYWORD!! // SOME ITEMS MIGHT HAVE SAME CATEGORY BUT DIFFERENT KEYWORD
             )}
             style={styles.pantryStyle}
             showsVerticalScrollIndicator={false}
@@ -248,7 +233,7 @@ export default function Pantry() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ItemCard
-            head={cardElement(item.name)}
+            head={cardElement(item.name, item.quantity, item.keyword)}
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}

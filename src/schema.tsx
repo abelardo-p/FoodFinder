@@ -24,20 +24,6 @@ interface IngredientStorage {
 	max_days: number;
 }
 
-// interface Ingredient {
-// 	name: string;
-// 	id: string;
-// 	broad_category: string;
-// }
-
-
-
-// const defaultConfig: Ingredient = {
-//   name: 'omomo',
-//   id: '1',
-//   broad_category: 'bruh'
-// };
-
 // returns in this format: MM/DD/YYYY
 const getCurrFormattedDate = () => {
   const today = new Date();
@@ -89,7 +75,8 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 
 			quantity INTEGER NOT NULL,
 			datePurchased TEXT NOT NULL,
-			dateOpened TEXT NOT NULL
+			dateOpened TEXT NOT NULL,
+			keyword TEXT
 		);
   	`);
 
@@ -128,29 +115,33 @@ export async function deleteItemFromDB(id: number, db: SQLite.SQLiteDatabase) {
 export async function fetchItemsForPantry(db: SQLite.SQLiteDatabase) {
 
 	try {
-      return await db.getAllAsync('SELECT id, name FROM FoodItem');
+      return await db.getAllAsync('SELECT id, name, keyword, quantity FROM FoodItem');
 
     } catch (error) {
       console.error("Failed to fetch items", error);
     }
 }
 
-export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, foodObj: FoodData) {
+export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, foodObj: FoodData, keyword: string) {
 
 	// Dummy variables for now:
-	const quantity = 0;
-	const datePurchased = getCurrFormattedDate();
-	const dateOpened = getCurrFormattedDate(); 
+	const quantity = 1;
+	const datePurchased = getCurrFormattedDate(); // ASSUMED THAT ADDED DATE IS PURCHASED DATE
+	const dateOpened = getCurrFormattedDate(); // TODO: THIS IS STILL A DUMMY VARIABLE
 
 
 
 	const foodItemInsertion = await db.prepareAsync(`
-  		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened) 
-		VALUES ($foodID, $foodName, $foodCat, $quantity, $datePurchased, $dateOpened)
+  		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened, keyword) 
+		VALUES ($foodID, $foodName, $foodCat, $quantity, $datePurchased, $dateOpened, $keyword)
+		ON CONFLICT (id)
+		DO 
+			UPDATE 
+			SET quantity = quantity + 1;
 	`);
 
 	const foodStorageInsertion = await db.prepareAsync(`
-  		INSERT INTO FoodStorage (id, storage, minDays, maxDays) 
+  		INSERT OR IGNORE INTO FoodStorage (id, storage, minDays, maxDays) 
 		VALUES ($foodID, $storage, $minDays, $maxDays)
 	`);
 
@@ -159,9 +150,10 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 			$foodID: id, 
 			$foodName: foodObj[id].name,
 			$foodCat: foodObj[id].category,
-			$quantity: 1,
+			$quantity: quantity, // This should get overwritten since it goes through the CONFLICT clause instead
 			$datePurchased: datePurchased,
 			$dateOpened: dateOpened,
+			$keyword: keyword
 		});
 		
 		console.log(result.lastInsertRowId, result.changes);

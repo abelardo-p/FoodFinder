@@ -89,30 +89,28 @@ def format_single_item_returned_from_id(rows: list[sqlalchemy.engine.Row]):
     
     return foodItem
 
-# Test input:
-test_input = {
-    "whole wheat bread": {
-        101: ["whole wheat", "bread", "wheat", "loaf", "whole", "grain"],
-        102: ["whole wheat", "bread", "wheat", "rolls", "whole", "grain"],
-        103: ["whole wheat", "bread", "wheat", "bagel", "whole", "grain"],
-    },
+def convert_sets_to_lists(data):
+    """Convert all sets in nested dict to lists"""
+    result = {}
+    for key, value in data.items():
+        result[key] = {item_id: list(keywords) for item_id, keywords in value.items()}
+    return result
 
-    "whole wheat flour": {
-        201: ["whole wheat", "flour", "wheat", "whole", "grain"],
-        202: ["whole wheat", "flour", "wheat", "stone-ground", "whole", "grain"],
-        203: ["whole wheat", "flour", "wheat", "white whole wheat", "whole"],
-    },
 
-    "whole wheat pasta": {
-        301: ["whole wheat", "pasta", "wheat", "whole", "spaghetti"],
-        302: ["whole wheat", "pasta", "wheat", "penne", "whole"],
-    },
+def extract_general(data: dict) -> dict:
+    general = {}
+    cleaned = {}
+    
+    for category, items in data.items():
+        cleaned_items = {}
+        for key, tags in items.items():
+            if not tags:
+                general[key] = [category]
+            else:
+                cleaned_items[key] = tags
+        if cleaned_items:
+            cleaned[category] = cleaned_items
+    
+    cleaned["_general"] = general
+    return cleaned
 
-    # example where one item may end up with no display keywords
-    "whole wheat tortilla": {
-        401: ["whole wheat", "tortilla", "wheat", "whole"],
-        402: ["whole wheat", "tortilla", "wheat", "whole", "wrap"],
-    }
-}
-
-print(format_items(test_input))
