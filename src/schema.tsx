@@ -17,13 +17,6 @@ interface FoodData {
   [id: string]: FoodItem;
 }
 
-interface IngredientStorage {
-	id: string;
-	storage: string;
-	min_days: number;
-	max_days: number;
-}
-
 // returns in this format: MM/DD/YYYY
 const getCurrFormattedDate = () => {
   const today = new Date();
@@ -80,6 +73,9 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 		);
   	`);
 
+}
+
+async function createFoodStorageTable(db: SQLite.SQLiteDatabase) {
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
 		CREATE TABLE IF NOT EXISTS FoodStorage (
@@ -91,10 +87,6 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
     		FOREIGN KEY (id) REFERENCES FoodItem(id)
 		);
   	`);
-
-	// insertIntoFoodItem(db);
-	printTable(db);
-
 }
 
 // Used for debugging
@@ -182,4 +174,6 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 
 export async function createTables(db: SQLite.SQLiteDatabase) {
 	createFoodItemTable(db);
+	createFoodStorageTable(db);
+	printTable(db);
 }
