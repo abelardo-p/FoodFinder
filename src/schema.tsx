@@ -75,6 +75,20 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 
 }
 
+async function createPreferenceTables(db: SQLite.SQLiteDatabase) {
+	await db.execAsync(`
+		PRAGMA journal_mode = WAL; 
+		CREATE TABLE IF NOT EXISTS Allergy (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			allergy TEXT NOT NULL
+		);
+		CREATE TABLE IF NOT EXISTS Cuisine (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			cuisine TEXT NOT NULL
+		);
+  	`);
+}
+
 async function createFoodStorageTable(db: SQLite.SQLiteDatabase) {
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
@@ -175,5 +189,6 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 export async function createTables(db: SQLite.SQLiteDatabase) {
 	createFoodItemTable(db);
 	createFoodStorageTable(db);
+	createPreferenceTables(db);
 	printTable(db);
 }
