@@ -3,7 +3,7 @@ import SearchBar from "@/components/ui/search-bar";
 import * as dbFunctions from "@/src/schema";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 
 const machineIP: string = 'localhost';
@@ -57,7 +57,8 @@ export default function Pantry() {
   const [results, setSearchResults] = useState<ItemResults[]>([]);
   const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
 
-  
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
 
   const fetchItems = async () => {
@@ -190,14 +191,30 @@ export default function Pantry() {
       marginTop: 105
       }}
     >
-      <SearchBar
-        containerStyle={{}} 
-        searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
-        onChange={(text: string) => setSearchQuery(text)}
-        onFocus={() => {setFocus(true)}}
-        onBlur={() => {}}
-      >
-      </SearchBar>
+      <View style={{flexDirection: 'row'}}>
+        <View>
+          <Text>Avoid</Text>
+          <Switch
+            trackColor={{false: '#656169', true: '#81b0ff'}}
+            thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+            style={{width: 100, marginRight: 60}}
+          />
+        </View>
+        <SearchBar
+          containerStyle={{}} 
+          searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
+          onChange={(text: string) => setSearchQuery(text)}
+          onFocus={() => {setFocus(true)}}
+          onBlur={() => {}}
+        >
+        </SearchBar>
+
+        <View style={{width: 100}}>
+        </View>
+      </View>
 
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
