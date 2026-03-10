@@ -1,7 +1,6 @@
 import json
 import os
 
-import sqlalchemy
 from app.format_results import *
 from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

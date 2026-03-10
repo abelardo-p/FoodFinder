@@ -25,6 +25,8 @@ type Item = {
   quantity: number;
 }
 
+
+// @abe, idk how we should format this
 const cardElement = (text: string, quantity: number, keyword: string) => {
 	console.log(text, quantity, keyword);
   return (
@@ -47,7 +49,6 @@ export default function Pantry() {
   const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isCatSelected, setCatSelected] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -57,9 +58,12 @@ export default function Pantry() {
   const [results, setSearchResults] = useState<ItemResults[]>([]);
   const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
 
+<<<<<<< HEAD
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
+=======
+>>>>>>> origin/reina-code-cleanup
 
   const fetchItems = async () => {
     const foodItems = await dbFunctions.fetchItemsForPantry(db);
@@ -73,13 +77,13 @@ export default function Pantry() {
 
   useEffect(() => {
     // Don't search if below minimum length
-    if (searchQuery.length > 0 && searchQuery.length < 3) {
+    if (searchQuery.length > 0 && searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
 
     const timeoutId = setTimeout(async () => {
-      if (searchQuery.length >= 3) {
+      if (searchQuery.length >= 2) {
         try {
           console.log(searchQuery)
           const response = await fetch(`http://${currentMachineIP}:8000/search`, {
@@ -92,10 +96,13 @@ export default function Pantry() {
 
           
           const data = await response.json();
-          if (!data) return [];
 
-          console.log(JSON.parse(data.results));
-
+		  // Handles if query gets no results
+		  if (!data.results) {
+			console.log("No results found");
+			setSearchResults([]);
+			return;
+		  }
           const dataResults = JSON.parse(data.results);
 
           // Converting the weird json to an array-like in order to render for later functions
@@ -127,7 +134,7 @@ export default function Pantry() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
   
-  const handleGroupPress = (category: string, ) => {
+  const handleGroupPress = (category: string) => {
     setGroupSelected(true);
     const categoryItems = results.filter(item => item.category === category);
     setCategoryItems(categoryItems);
@@ -158,12 +165,11 @@ export default function Pantry() {
 
     dbFunctions.printTable(db);
 
-
     // Reset everything
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
-    await fetchItems();
+    fetchItems();
   }
 
   const handleLongPress = (id: string) => {
