@@ -37,19 +37,71 @@ def load_datasets(csv_files_path: str, table_name: str, load_mode: str, username
 
 def load_all(username: str, port: int, load_mode: str = 'append'):
     table_names = ['categories', 'ingredient', 'shelflives', 'recipe', 'recipeingredients']
-    csv_paths = ['../data/ingredients/categories_ids_mapping', '../data/ingredients/foodkeeper_items.csv', 
-                 '../data/ingredients/shelf_lives.csv', '../data/recipes', '../data/recipe_ingredients']
+    csv_paths = [
+        '../data/ingredients/categories_ids_mapping',
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+        '../data/recipe_ingredients'
+    ]
+        '../data/ingredients/foodkeeper_items.csv',
+        '../data/ingredients/shelf_lives.csv',
+        '../data/recipes',
+    ]
 
     for i in range(len(table_names)):
-        load_datasets(csv_paths[i], table_names[i], load_mode, username, port)
-    
+    table_name = 'cuisinetype'
+    csv_path = '/Users/anikaraghavan/Downloads/more_recipess/cuisines_to_ids.json'
 
 if __name__ == '__main__':
     table_name = 'shelflives'
     csv_path = '../data/ingredients/shelf_lives.csv'
     username = 'anikaraghavan'
-    load_mode = 'append'
-    port = 5432
 
     load_datasets(csv_path, table_name, load_mode, username, port)
 
