@@ -1,37 +1,42 @@
 import * as SQLite from 'expo-sqlite';
 
-interface Ingredient {
-	name: string;
-	id: string;
-	broad_category: string;
-	storage: string;
-	min_days: Number;
-	max_days: Number;
+
+interface StorageOption {
+  storage: string;
+  min_days: number;
+  max_days: number;
 }
 
-const defaultConfig: Ingredient = {
-  name: 'omomo',
-  id: '1',
-  broad_category: 'bruh',
-  storage: 'bruh',
-  min_days: 0,
-  max_days: 0,
-};
+interface FoodItem {
+  name: string;
+  category: string;
+  storage_type: StorageOption[];
+}
 
-/*
-Food Item Table:
-int FoodId (pk)
-varchar category
-varchar name
-varchar storage // sqlite doesn't have an enum type
-int min_days
-int max_days
+interface FoodData {
+  [id: string]: FoodItem;
+}
 
-(These are updated when user adds item or updates quantity)
-int quantity
-date purchased // sqlite doesn't have date types; use a built-in function to format it properly
-date opened
-*/
+interface IngredientStorage {
+	id: string;
+	storage: string;
+	min_days: number;
+	max_days: number;
+}
+
+// interface Ingredient {
+// 	name: string;
+// 	id: string;
+// 	broad_category: string;
+// }
+
+
+
+// const defaultConfig: Ingredient = {
+//   name: 'omomo',
+//   id: '1',
+//   broad_category: 'bruh'
+// };
 
 // returns in this format: MM/DD/YYYY
 const getCurrFormattedDate = () => {
@@ -46,7 +51,15 @@ const getCurrFormattedDate = () => {
 
 export const printTable = async (db: SQLite.SQLiteDatabase) => {
 	try {
-  		const allRows = await db.getAllAsync('SELECT * FROM FoodItem');
+  		let allRows = await db.getAllAsync('SELECT * FROM FoodItem');
+	
+		if (allRows.length === 0) {
+			console.log("Table empty");
+		} else {
+			console.table(allRows);
+		}
+
+		allRows = await db.getAllAsync('SELECT * FROM FoodStorage');
 	
 		if (allRows.length === 0) {
 			console.log("Table empty");
@@ -62,29 +75,51 @@ export const printTable = async (db: SQLite.SQLiteDatabase) => {
 
 
 async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
+	// deleteAllTablesFromDB(db);
+
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
 		CREATE TABLE IF NOT EXISTS FoodItem (
-		id INTEGER PRIMARY KEY,
-		name TEXT, 
-		category TEXT NOT NULL,
-		storage TEXT,
-		minDays INTEGER,
-		maxDays INTEGER,
+			id TEXT PRIMARY KEY,
+			name TEXT, 
+			category TEXT NOT NULL,
+			storage TEXT,
+			minDays INTEGER,
+			maxDays INTEGER,
 
-		quantity INTEGER NOT NULL,
-		datePurchased TEXT NOT NULL,
-		dateOpened TEXT NOT NULL
+			quantity INTEGER NOT NULL,
+			datePurchased TEXT NOT NULL,
+			dateOpened TEXT NOT NULL
 		);
   	`);
 
+	await db.execAsync(`
+		PRAGMA journal_mode = WAL; 
+		CREATE TABLE IF NOT EXISTS FoodStorage (
+			id TEXT,
+			storage TEXT,
+			minDays INTEGER,
+			maxDays INTEGER,
+			PRIMARY KEY (id, storage),
+    		FOREIGN KEY (id) REFERENCES FoodItem(id)
+		);
+  	`);
+
+	// insertIntoFoodItem(db);
 	printTable(db);
 
 }
 
-export async function deleteItemFromDB(id: string, db: SQLite.SQLiteDatabase) {
+// Used for debugging
+async function deleteAllTablesFromDB(db: SQLite.SQLiteDatabase) {
+	await db.execAsync(`DROP TABLE IF EXISTS FoodItem;`);
+	await db.execAsync(`DROP TABLE IF EXISTS FoodStorage;`);
+}
+
+export async function deleteItemFromDB(id: number, db: SQLite.SQLiteDatabase) {
 	try {
-		await db.runAsync('DELETE FROM FoodItem WHERE id = $value', { $value: id })
+		await db.runAsync('DELETE FROM FoodItem WHERE id = $value', { $value: id });
+		await db.runAsync('DELETE FROM FoodStorage WHERE id = $value', { $value: id });
 	} catch (error) {
 		console.error("Deletion failed", error)
 	}
@@ -100,7 +135,7 @@ export async function fetchItemsForPantry(db: SQLite.SQLiteDatabase) {
     }
 }
 
-export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, foodObj: Ingredient = defaultConfig) {
+export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, foodObj: FoodData) {
 
 	// Dummy variables for now:
 	const quantity = 0;
@@ -109,28 +144,46 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, foodObj: Ing
 
 
 
-	const statement = await db.prepareAsync(`
-  		INSERT INTO FoodItem (id, name, category, storage, minDays, maxDays, quantity, datePurchased, dateOpened) 
-		VALUES ($foodID, $foodName, $foodCat, $foodStor, $minDays, $maxDays, $quantity, $datePurchased, $dateOpened)
+	const foodItemInsertion = await db.prepareAsync(`
+  		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened) 
+		VALUES ($foodID, $foodName, $foodCat, $quantity, $datePurchased, $dateOpened)
+	`);
+
+	const foodStorageInsertion = await db.prepareAsync(`
+  		INSERT INTO FoodStorage (id, storage, minDays, maxDays) 
+		VALUES ($foodID, $storage, $minDays, $maxDays)
 	`);
 
 	try {
-		let result = await statement.executeAsync({ 
-			$foodID: '100', 
-			$foodName: 'omomo',
-			$foodCat: 'bruh',
-			$foodStor: 'bruh',
-			$minDays: 0,
-			$maxDays: 0,
+		let result = await foodItemInsertion.executeAsync({ 
+			$foodID: id, 
+			$foodName: foodObj[id].name,
+			$foodCat: foodObj[id].category,
 			$quantity: 1,
 			$datePurchased: datePurchased,
 			$dateOpened: dateOpened,
 		});
+		
 		console.log(result.lastInsertRowId, result.changes);
+
+		const storageOptions = foodObj[id].storage_type;
+
+		for (const storageType of storageOptions) {
+			let result = await foodStorageInsertion.executeAsync({
+				$foodID: id,
+				$storage: storageType.storage,
+				$minDays: storageType.min_days,
+				$maxDays: storageType.max_days,
+			});
+			console.log(result.lastInsertRowId, result.changes);
+
+		}
+
 	} catch (error) {
 		console.log(error);
 	} finally {
-		await statement.finalizeAsync();
+		await foodItemInsertion.finalizeAsync();
+		await foodStorageInsertion.finalizeAsync();
 	}
 
 }

@@ -1,9 +1,12 @@
 import json
+import json
 import os
 
 from app.format_results import *
 from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from pydantic import BaseModel
 from sqlalchemy import ARRAY, String, bindparam, create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -27,6 +30,7 @@ Session = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 app = FastAPI()
 
 # Allows calls from:
+origins = ["*"]
 origins = ["*"]
 
 app.add_middleware(
@@ -63,6 +67,17 @@ async def search_item(data: SearchSchema, db = Depends(get_db)) -> dict:
 
     
     
+    WHERE keywords @> :item;
+    """)
+    
+    item_list = data.item.split()
+    item_list = [word.lower() for word in item_list]
+
+    print(item_list)
+    results = db.execute(query, {"item": item_list}).fetchall()
+
+    
+    
     print(f'Result: {results}')
 
     if not results:
@@ -83,6 +98,10 @@ async def add_item_to_pantry_list(food_id: int, db = Depends(get_db)) -> dict:
     query = text("""
         SELECT name, i.id, broad_category, storage, min_days, max_days 
         FROM ingredient as i 
+        JOIN categories as c on c.id = i.category_id 
+        JOIN shelflives as sl on sl.fk_id = i.id 
+        WHERE i.id = :id;
+    """)
         JOIN categories as c on c.id = i.category_id 
         JOIN shelflives as sl on sl.fk_id = i.id 
         WHERE i.id = :id;
