@@ -3,7 +3,7 @@ import SearchBar from "@/components/ui/search-bar";
 import * as dbFunctions from "@/src/schema";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { FlatList, LayoutAnimation, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 
 const machineIP: string = 'localhost';
@@ -21,34 +21,17 @@ type ItemResults = {
 type Item = {
   id: string;
   name: string;
-}
-
-interface FoodData {
-  /*
-  {'chicken': 
-  {113: ['whole'], 
-  517: ['deli meat', 'pre-packaged', 'package', 'luncheon meat']}, 
-  'chicken parts': 
-  {116: ['breast halves', 'breast', 'bone', 'bone-in', 'half', 'halves'], 
-  117: ['breast halves', 'boneless', 'breast', 'bone', 'half', 'halves'], 
-  118: ['leg', 'thigh']}, 
-  '_general': 
-  {115: ['ground turkey or chicken'], 
-  131: ['stuffed, raw chicken breasts'], 
-  134: ['chicken nuggets, patties'], 
-  136: ['fried chicken'], 
-  141: ['rotisserie chicken'], 
-  142: ['canned chicken'], 
-  418: ['chicken salad']}}
-  */
-  [category: string]: Record<string, string[]>;
+  keyword: string;
+  quantity: number;
 }
 
 
-const cardElement = (text: string) => {
+// @abe, idk how we should format this
+const cardElement = (text: string, quantity: number, keyword: string) => {
+	console.log(text, quantity, keyword);
   return (
     <Text style={{marginLeft: 20, fontSize: 18}}>
-      {text}
+      {text} {quantity} {keyword}
     </Text>
   )
 }
@@ -66,7 +49,6 @@ export default function Pantry() {
   const db = useSQLiteContext();
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isCatSelected, setCatSelected] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -76,8 +58,12 @@ export default function Pantry() {
   const [results, setSearchResults] = useState<ItemResults[]>([]);
   const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
 
-  
+<<<<<<< HEAD
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
+=======
+>>>>>>> origin/reina-code-cleanup
 
   const fetchItems = async () => {
     const foodItems = await dbFunctions.fetchItemsForPantry(db);
@@ -91,13 +77,13 @@ export default function Pantry() {
 
   useEffect(() => {
     // Don't search if below minimum length
-    if (searchQuery.length > 0 && searchQuery.length < 3) {
+    if (searchQuery.length > 0 && searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
 
     const timeoutId = setTimeout(async () => {
-      if (searchQuery.length >= 3) {
+      if (searchQuery.length >= 2) {
         try {
           console.log(searchQuery)
           const response = await fetch(`http://${currentMachineIP}:8000/search`, {
@@ -110,10 +96,13 @@ export default function Pantry() {
 
           
           const data = await response.json();
-          if (!data) return [];
 
-          console.log(JSON.parse(data.results));
-
+		  // Handles if query gets no results
+		  if (!data.results) {
+			console.log("No results found");
+			setSearchResults([]);
+			return;
+		  }
           const dataResults = JSON.parse(data.results);
 
           // Converting the weird json to an array-like in order to render for later functions
@@ -140,19 +129,19 @@ export default function Pantry() {
       } else {
         setSearchResults([]);
       }
-    }, 2000); 
+    }, 500); 
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
   
-  const handleGroupPress = (category: string, ) => {
+  const handleGroupPress = (category: string) => {
     setGroupSelected(true);
     const categoryItems = results.filter(item => item.category === category);
     setCategoryItems(categoryItems);
     console.log(categoryItems);
   }
 
-  const handleCatPress = async (foodId: string) => {
+  const handleCatPress = async (foodId: string, keyword: string) => {
     // Handle the other API call here and add to database!
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
@@ -170,9 +159,11 @@ export default function Pantry() {
 
     console.log(dataResults);
 
-    dbFunctions.insertIntoFoodItem(db, foodId, dataResults);
-    dbFunctions.printTable(db);
+	// Update item quantity or add new item to database
+    await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
 
+
+    dbFunctions.printTable(db);
 
     // Reset everything
     setFocus(false);
@@ -191,9 +182,10 @@ export default function Pantry() {
       setItems((prev) => prev.filter((item) => item.id !== id));
       setActiveId(null);
 	  dbFunctions.deleteItemFromDB(Number(id), db);
+	  dbFunctions.printTable(db);
     }, 300);
 
-	dbFunctions.printTable(db);
+	
   };
 
   return (
@@ -205,14 +197,30 @@ export default function Pantry() {
       marginTop: 105
       }}
     >
-      <SearchBar
-        containerStyle={{}} 
-        searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
-        onChange={(text: string) => setSearchQuery(text)}
-        onFocus={() => {setFocus(true)}}
-        onBlur={() => {}}
-      >
-      </SearchBar>
+      <View style={{flexDirection: 'row'}}>
+        <View>
+          <Text>Avoid</Text>
+          <Switch
+            trackColor={{false: '#656169', true: '#81b0ff'}}
+            thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+            style={{width: 100, marginRight: 60}}
+          />
+        </View>
+        <SearchBar
+          containerStyle={{}} 
+          searchBarStyle={{ height: 60, width: 250, borderWidth: 3, borderRadius: 10, backgroundColor: 'snow'}}
+          onChange={(text: string) => setSearchQuery(text)}
+          onFocus={() => {setFocus(true)}}
+          onBlur={() => {}}
+        >
+        </SearchBar>
+
+        <View style={{width: 100}}>
+        </View>
+      </View>
 
       {isFocus ? (
         <View style={{flexDirection: 'row'}}>
@@ -232,7 +240,7 @@ export default function Pantry() {
             data={subItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item } ) => (
-              dataElement(item.name, () => handleCatPress(item.id))
+              dataElement(item.name, () => handleCatPress(item.id, item.name)) // I GUESS ITEM.NAME IS THE KEYWORD!! // SOME ITEMS MIGHT HAVE SAME CATEGORY BUT DIFFERENT KEYWORD
             )}
             style={styles.pantryStyle}
             showsVerticalScrollIndicator={false}
@@ -248,7 +256,7 @@ export default function Pantry() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ItemCard
-            head={cardElement(item.name)}
+            head={cardElement(item.name, item.quantity, item.keyword)}
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}

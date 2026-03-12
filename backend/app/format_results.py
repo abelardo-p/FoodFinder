@@ -115,3 +115,4 @@ def extract_general(data: dict) -> dict:
     
     cleaned["_general"] = general
     return cleaned
+
