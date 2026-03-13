@@ -58,12 +58,9 @@ export default function Pantry() {
   const [results, setSearchResults] = useState<ItemResults[]>([]);
   const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
 
-<<<<<<< HEAD
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-=======
->>>>>>> origin/reina-code-cleanup
 
   const fetchItems = async () => {
     const foodItems = await dbFunctions.fetchItemsForPantry(db);
