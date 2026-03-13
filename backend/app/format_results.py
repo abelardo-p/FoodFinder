@@ -1,7 +1,5 @@
 from collections import defaultdict
-
 import sqlalchemy
-
 import sqlalchemy
 from krovetzstemmer import Stemmer
 
@@ -72,10 +70,9 @@ def format_single_item_returned_from_id(rows: list[sqlalchemy.engine.Row]):
         }
     }
     """
-
     foodItem = {}
     
-    for name, id, category, storage, min_days, max_days in rows:
+    for name, id, category, storage, state, min_days, max_days in rows:
         if id not in foodItem:
             foodItem[id] = {
                 'name': name,
@@ -84,6 +81,7 @@ def format_single_item_returned_from_id(rows: list[sqlalchemy.engine.Row]):
             }
         
         foodItem[id]['storage_type'].append({
+            'state': 'UNOPENED' if state == 'DEFAULT' else 'OPENED',
             'storage': storage,
             'min_days': min_days,
             'max_days': max_days

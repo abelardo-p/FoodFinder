@@ -2,6 +2,7 @@ import * as SQLite from 'expo-sqlite';
 
 
 interface StorageOption {
+  state: string;
   storage: string;
   min_days: number;
   max_days: number;
@@ -90,14 +91,16 @@ async function createPreferenceTables(db: SQLite.SQLiteDatabase) {
 }
 
 async function createFoodStorageTable(db: SQLite.SQLiteDatabase) {
+	// Added state field (Opened / unopened)
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
 		CREATE TABLE IF NOT EXISTS FoodStorage (
 			id TEXT,
 			storage TEXT,
+			state TEXT,				
 			minDays INTEGER,
 			maxDays INTEGER,
-			PRIMARY KEY (id, storage),
+			PRIMARY KEY (id, storage, state),
     		FOREIGN KEY (id) REFERENCES FoodItem(id)
 		);
   	`);
@@ -136,7 +139,6 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 	const dateOpened = getCurrFormattedDate(); // TODO: THIS IS STILL A DUMMY VARIABLE
 
 
-
 	const foodItemInsertion = await db.prepareAsync(`
   		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened, keyword) 
 		VALUES ($foodID, $foodName, $foodCat, $quantity, $datePurchased, $dateOpened, $keyword)
@@ -147,8 +149,8 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 	`);
 
 	const foodStorageInsertion = await db.prepareAsync(`
-  		INSERT OR IGNORE INTO FoodStorage (id, storage, minDays, maxDays) 
-		VALUES ($foodID, $storage, $minDays, $maxDays)
+  		INSERT OR IGNORE INTO FoodStorage (id, storage, state, minDays, maxDays) 
+		VALUES ($foodID, $storage, $state, $minDays, $maxDays)
 	`);
 
 	try {
@@ -170,6 +172,7 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 			let result = await foodStorageInsertion.executeAsync({
 				$foodID: id,
 				$storage: storageType.storage,
+				$state: storageType.state,
 				$minDays: storageType.min_days,
 				$maxDays: storageType.max_days,
 			});
@@ -187,8 +190,8 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 }
 
 export async function createTables(db: SQLite.SQLiteDatabase) {
-	createFoodItemTable(db);
-	createFoodStorageTable(db);
-	createPreferenceTables(db);
-	printTable(db);
+	await createFoodItemTable(db);
+	await createFoodStorageTable(db);
+	await createPreferenceTables(db);
+	await printTable(db);
 }
