@@ -83,15 +83,11 @@ export default function Pantry() {
       if (searchQuery.length >= 2) {
         try {
           console.log(searchQuery)
-          const response = await fetch(`http://${currentMachineIP}:8000/search`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ item: searchQuery })
+          const response = await fetch(`http://${currentMachineIP}:8000/search?data=${ encodeURIComponent(searchQuery)}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
           });
 
-          
           const data = await response.json();
 
 		  // Handles if query gets no results
@@ -142,7 +138,7 @@ export default function Pantry() {
     // Handle the other API call here and add to database!
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
-
+    console.log(foodId)
     const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
       
     const response = await fetch(url, {
@@ -151,9 +147,8 @@ export default function Pantry() {
     });
 
     const data = await response.json();
-    const dataResults = JSON.parse(data.results);
+    const dataResults = data.results['foodId'];
     
-
     console.log(dataResults);
 
 	// Update item quantity or add new item to database
