@@ -81,6 +81,9 @@ def contains_override(title: str, override_terms: list[str]) -> bool:
 NUM_KEPT_INGREDIENTS = 8    # max number of recipe ingredients to encode in the recipe embedding
 SIM_THRESH = 0.05
 
+def clean_name():
+    """Cleans a recipe title so it only contains ingredient-relevant information"""
+
 def categorize_recipes(recipes_directory_path: str, recipe_to_ingredients: dict, embed_model: SentenceTransformer):
     """
     Classifies each recipe as one of {breakfast, lunch, dinner, dessert, side}. 
@@ -153,13 +156,6 @@ if __name__ == '__main__':
     categorize_recipes(recipes_directory_path='data/recipes',
                         recipe_to_ingredients=recipes_to_ingredients,
                         embed_model=embedding_model)
-    
 
 
-    """" 
-    Heuristic for generating embedding string: IF recipe title ( caption ) contains "minutes", "serves", 
-    or doesn't contain ANY ingredient (as defined as inside USDA ingredient table), remove it. 
-    Basically we want to remove captions that don't describe what the dish is actually composed of
-    (i.e. ones that explain how good the dish is, where its from, or preparation time stats). 
-    Also we should remove stopwords.
-    """
+ 
