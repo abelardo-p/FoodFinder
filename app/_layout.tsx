@@ -8,7 +8,7 @@ export default function RootLayout() {
   return (
 	// Provider let's us call this database in other files by just using the context instead! Since it wraps around everything, all children
 	// should have access to the database
-	<SQLiteProvider databaseName="local.db" onInit={createTables}>
+	<SQLiteProvider databaseName="locals.db" onInit={createTables}>
 		<Stack>
 		<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 		</Stack>

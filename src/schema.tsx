@@ -138,7 +138,6 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 	const datePurchased = getCurrFormattedDate(); // ASSUMED THAT ADDED DATE IS PURCHASED DATE
 	const dateOpened = getCurrFormattedDate(); // TODO: THIS IS STILL A DUMMY VARIABLE
 
-
 	const foodItemInsertion = await db.prepareAsync(`
   		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened, keyword) 
 		VALUES ($foodID, $foodName, $foodCat, $quantity, $datePurchased, $dateOpened, $keyword)
@@ -147,7 +146,6 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 			UPDATE 
 			SET quantity = quantity + 1;
 	`);
-
 	const foodStorageInsertion = await db.prepareAsync(`
   		INSERT OR IGNORE INTO FoodStorage (id, storage, state, minDays, maxDays) 
 		VALUES ($foodID, $storage, $state, $minDays, $maxDays)

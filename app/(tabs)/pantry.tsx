@@ -138,7 +138,6 @@ export default function Pantry() {
     // Handle the other API call here and add to database!
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
-    console.log(foodId)
     const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
       
     const response = await fetch(url, {
@@ -147,13 +146,11 @@ export default function Pantry() {
     });
 
     const data = await response.json();
-    const dataResults = data.results['foodId'];
-    
-    console.log(dataResults);
+    const dataResults = data.results;
+    console.log(dataResults)
 
 	// Update item quantity or add new item to database
     await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
-
 
     dbFunctions.printTable(db);
 
@@ -177,7 +174,6 @@ export default function Pantry() {
 	  dbFunctions.printTable(db);
     }, 300);
 
-	
   };
 
   return (

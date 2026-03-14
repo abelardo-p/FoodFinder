@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
   bubble: {
     // borderColor: 'darkgrey',
     // borderWidth: 1,
+
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
