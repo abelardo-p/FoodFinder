@@ -48,19 +48,25 @@ export default function Index() {
   const [activeRestrictions, setActiveRestrictions] = useState<restriction[]>([]);
   
   const handleRestrictionPress = (item: restriction) => {
-    if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
-      return
-    } else {
+    if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(items => [...items, item]);
     }
   };
   const handleRestrictionLongPress = (item: restriction) => {
     if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
-      
-    } else {
-
+      setActiveRestrictions(activeRestrictions.filter(activeRestriction => activeRestriction.id !== item.id && activeRestriction.name !== item.name));
     }
   };
+  const handleCuisinePress = (cuisine: string) => {
+    if (!activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
+      setActiveCuisines(cuisines => [...cuisines, cuisine]);
+    }
+  }
+  const handleCuisineLongPress = (cuisine: string) => {
+    if (activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
+      setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine !== cuisine));
+    }
+  }
   return (
     <View style={{flex: 1, marginTop: 25, marginBottom: 20, flexDirection: 'row', justifyContent: 'center'}}>
       <FlatList
@@ -70,10 +76,10 @@ export default function Index() {
           <ItemCard
             head={cardElement(item)}
             isActive={activeCuisines.includes(item)}
-            onClickCallBack={() => handleShortPress()}
-            onLongClickCallBack={() => handleLongPress()}
+            onClickCallBack={() => handleCuisinePress(item)}
+            onLongClickCallBack={() => handleCuisineLongPress(item)}
             pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
-            longPressStyle={{ backgroundColor: 'lightcoral' }}
+            longPressStyle={{ backgroundColor: 'lightblue' }}
           />
         )}
         contentContainerStyle={{alignItems: 'center'}}
@@ -95,10 +101,10 @@ export default function Index() {
           <ItemCard
             head={cardElement(item.name)}
             isActive={activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name === item.name)}
-            onClickCallBack={() => {}}
-            onLongClickCallBack={() => handleLongPress()}
+            onClickCallBack={() => handleRestrictionPress(item)}
+            onLongClickCallBack={() => handleRestrictionLongPress(item)}
             pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
-            longPressStyle={{ backgroundColor: 'lightcoral' }}
+            longPressStyle={{ backgroundColor: 'lightblue' }}
           />
         )}
         contentContainerStyle={{alignItems: 'center'}}
