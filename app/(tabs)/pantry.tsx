@@ -1,6 +1,6 @@
 import ItemCard from "@/components/ui/item-card";
 import SearchBar from "@/components/ui/search-bar";
-import * as dbFunctions from "@/src/schema";
+import * as dbFunctions from "@/src/database_helper_functions";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, View } from "react-native";
@@ -83,7 +83,7 @@ export default function Pantry() {
       if (searchQuery.length >= 2) {
         try {
           console.log(searchQuery)
-          const response = await fetch(`http://${currentMachineIP}:8000/search?data=${ encodeURIComponent(searchQuery)}`, {
+          const response = await fetch(`http://${currentMachineIP}:8000/search/${ encodeURIComponent(searchQuery)}`, {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
           });
