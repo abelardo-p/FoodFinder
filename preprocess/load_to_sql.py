@@ -74,6 +74,7 @@ def load_datasets(csv_files_path: str, table_name: str, load_mode: str, username
         print(df.head())
 
         df.columns = df.columns.str.lower().str.strip()
+        df = df.drop(columns=['id'])
         print("after cleanup:", list(df.columns))
         populate_table(df)
 
@@ -92,8 +93,8 @@ def load_all(username: str, port: int, load_mode: str = 'append'):
         load_datasets(csv_paths[i], table_names[i], load_mode, username, port)
 
 if __name__ == '__main__':
-    table_name = 'cuisinetype'
-    csv_path = '/Users/anikaraghavan/Downloads/more_recipess/cuisines_to_ids.json'
+    table_name = 'reciperestrictiontype'
+    csv_path = 'data/more_recipes/healthlabels'
     username = 'anikaraghavan'
     load_mode = 'append'
     port = 5432
