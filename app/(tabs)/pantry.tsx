@@ -25,15 +25,24 @@ type Item = {
   quantity: number;
 }
 
-
 // @abe, idk how we should format this
+// @reina this is fine
 const cardElement = (text: string, quantity: number, keyword: string) => {
 	console.log(text, quantity, keyword);
-  return (
-    <Text style={{marginLeft: 20, fontSize: 18}}>
-      {text} {quantity} {keyword}
-    </Text>
-  )
+
+  if (text === keyword) {
+    return (
+      <Text style={{marginLeft: 20, fontSize: 18}}>
+        {text} {keyword}, {quantity}
+      </Text>
+    )
+  } else {
+    return (
+      <Text style={{marginLeft: 20, fontSize: 18}}>
+        {text} {keyword}, {quantity}
+      </Text>
+    )
+  }
 }
 const dataElement = (text: string, onPress: () => void) => {
   return (
@@ -248,7 +257,7 @@ export default function Pantry() {
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}
-            pressableStyle={{ alignItems: 'flex-start', margin: 5, height: 80, minWidth: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
+            pressableStyle={{ alignItems: 'flex-start', margin: 5, minHeight: 80, minWidth: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
             longPressStyle={{ backgroundColor: 'lightcoral' }}
           />
         )}
