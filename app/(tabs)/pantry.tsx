@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 
-const machineIP: string = 'localhost';
+const machineIP: string = '127.0.0.1';
 const emulatorIP: string = '10.0.2.2'
 
 const currentMachineIP: string = machineIP  

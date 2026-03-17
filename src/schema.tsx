@@ -16,7 +16,7 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 
 			quantity INTEGER NOT NULL,
 			datePurchased TEXT NOT NULL,
-			dateOpened TEXT NOT NULL,
+			dateOpened TEXT,
 			keyword TEXT
 		);
   	`);
@@ -28,11 +28,11 @@ async function createPreferenceTables(db: SQLite.SQLiteDatabase) {
 		PRAGMA journal_mode = WAL; 
 		CREATE TABLE IF NOT EXISTS Allergy (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			allergy TEXT NOT NULL UNIQUE
+			name TEXT NOT NULL UNIQUE
 		);
 		CREATE TABLE IF NOT EXISTS Cuisine (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			cuisine TEXT NOT NULL UNIQUE
+			name TEXT NOT NULL UNIQUE
 		);
   	`);
 }
@@ -55,7 +55,8 @@ async function createFoodStorageTable(db: SQLite.SQLiteDatabase) {
 
 // Used for debugging
 async function deleteAllTablesFromDB(db: SQLite.SQLiteDatabase) {
-	await db.execAsync(`DROP TABLE IF EXISTS *;`);
+	await db.execAsync(`DROP TABLE IF EXISTS Allergy;`);
+	await db.execAsync(`DROP TABLE IF EXISTS Cuisine;`);
 }
 
 

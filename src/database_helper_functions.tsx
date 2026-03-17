@@ -23,10 +23,7 @@ interface FoodData {
   [id: string]: FoodItem;
 }
 
-const ALLERGY_TABLE = "Allergy";
-const CUISINE_TABLE = "Cuisine";
-const ALLERGY_COL = "allergy";
-const CUISINE_COL = "cuisine";
+
 
 
 // returns in this format: MM/DD/YYYY
@@ -81,12 +78,21 @@ export const printTable = async (db: SQLite.SQLiteDatabase) => {
 }
 
 // await insert_preference(db, CUISINE_TABLE, CUISINE_COL, "italian");
-export const insert_preference = async (db: SQLite.SQLiteDatabase, table: string, column: string, value: string) => {
-	await db.runAsync(`INSERT OR IGNORE INTO ${table} (${column}) VALUES (?);`, [value]);
+export const insertPreference = async (db: SQLite.SQLiteDatabase, table: string, value: string) => {
+	await db.runAsync(`INSERT OR IGNORE INTO ${table} (name) VALUES (?);`, [value]);
 }
 
-export const delete_preference = async (db: SQLite.SQLiteDatabase, table: string, column: string, value: string) => {
-    await db.runAsync(`DELETE FROM ${table} WHERE ${column} = ?;`, [value]);
+export const deletePreference = async (db: SQLite.SQLiteDatabase, table: string, value: string) => {
+    await db.runAsync(`DELETE FROM ${table} WHERE name = ?;`, [value]);
+}
+
+export const fetchPreferences = async (db: SQLite.SQLiteDatabase, table: string) => {
+	try {
+		return await db.getAllAsync(`SELECT id, name FROM ${table};`);
+	} catch (error) {
+		console.error("Failed to fetch preferences", error);
+		return [];
+	}
 }
 
 // delete_preference(db, CUISINE_TABLE, CUISINE_COL, "italian");
@@ -117,7 +123,7 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 	// Dummy variables for now:
 	const quantity = 1;
 	const datePurchased = getCurrFormattedDate(); // ASSUMED THAT ADDED DATE IS PURCHASED DATE
-	const dateOpened = getCurrFormattedDate(); // TODO: THIS IS STILL A DUMMY VARIABLE
+	const dateOpened = null; // TODO: THIS IS STILL A DUMMY VARIABLE
 
 	const foodItemInsertion = await db.prepareAsync(`
   		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened, keyword) 

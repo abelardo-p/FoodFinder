@@ -1,14 +1,19 @@
-import ItemCardCollapsible from '@/components/ui/item-card-collapsible';
 import ItemCard from '@/components/ui/item-card';
+import * as dbFunctions from "@/src/database_helper_functions";
 
 import { useSQLiteContext } from 'expo-sqlite';
-import { View, Text, FlatList } from "react-native";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { FlatList, Text, View } from "react-native";
 
 type restriction = {
   id: string;
   name: string;
-};
+}
+
+type cuisine = string
+
+const ALLERGY_TABLE = "Allergy";
+const CUISINE_TABLE = "Cuisine";
 
 const restrictionList: restriction[] = [
   { id: "1", name: "vegetarian" },
@@ -41,30 +46,49 @@ export default function Index() {
   // Show allergends under differnt context
 
   //Same for cuisines
-  const [cuisines, setcuisines] = useState<string[]>(cuisine_type);
-  const [activeCuisines, setActiveCuisines] = useState<string[]>([]);
+  const [cuisines, setcuisines] = useState<cuisine[]>(cuisine_type);
+  const [activeCuisines, setActiveCuisines] = useState<cuisine[]>([]);
 
   const [restrictions, setRestrictions] = useState<restriction[]>(restrictionList);
   const [activeRestrictions, setActiveRestrictions] = useState<restriction[]>([]);
+
+  const fetchPreferences = async (table: string) => {
+    const preferences = await dbFunctions.fetchPreferences(db, table);
+    if (table === ALLERGY_TABLE) {
+      setActiveRestrictions((preferences as restriction[]) ?? []);
+    } else {
+      const preferredCuisines = (preferences as restriction[]).map(p => p.name);
+      setActiveCuisines(preferredCuisines as cuisine[] ?? []);
+    }
+	};
+  
+  useEffect(() => { 
+    fetchPreferences(ALLERGY_TABLE);
+    fetchPreferences(CUISINE_TABLE);
+  }, []);
   
   const handleRestrictionPress = (item: restriction) => {
     if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(items => [...items, item]);
+	    dbFunctions.insertPreference(db, ALLERGY_TABLE, item.name);
     }
   };
   const handleRestrictionLongPress = (item: restriction) => {
     if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(activeRestrictions.filter(activeRestriction => activeRestriction.id !== item.id && activeRestriction.name !== item.name));
-    }
+	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.name);
+	  }
   };
   const handleCuisinePress = (cuisine: string) => {
     if (!activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
       setActiveCuisines(cuisines => [...cuisines, cuisine]);
+	    dbFunctions.insertPreference(db, CUISINE_TABLE, cuisine);
     }
   }
   const handleCuisineLongPress = (cuisine: string) => {
     if (activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
       setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine !== cuisine));
+	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine);
     }
   }
   return (
