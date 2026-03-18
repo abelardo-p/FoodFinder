@@ -93,56 +93,62 @@ export default function Index() {
   }
   return (
     <View style={{flex: 1, marginTop: 25, marginBottom: 20, flexDirection: 'row', justifyContent: 'center'}}>
-      <FlatList
-        data={cuisines}
-        keyExtractor={(item) => item}
-        renderItem={({ item } ) => (
-          <ItemCard
-            head={cardElement(item)}
-            isActive={activeCuisines.includes(item)}
-            onClickCallBack={() => handleCuisinePress(item)}
-            onLongClickCallBack={() => handleCuisineLongPress(item)}
-            pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
-            longPressStyle={{ backgroundColor: 'lightblue' }}
-          />
-        )}
-        contentContainerStyle={{alignItems: 'center'}}
-        style={{
-          flexGrow: 0,
-          width: 350,
-          shadowColor: '#000',
-          shadowOffset: { width: 1, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 6,
-          borderRadius: 12, borderWidth: 0, marginTop: 70, marginBottom: 25, marginLeft: 5, marginRight: 30, padding: 10, backgroundColor: 'snow'}}
-        ListFooterComponent={<View style={{ height: 20 }} />}
-        showsVerticalScrollIndicator={false}
-      />
-      <FlatList
-        data={restrictions}
-        keyExtractor={(item) => item.id }
-        renderItem={({ item } ) => (
-          <ItemCard
-            head={cardElement(item.name)}
-            isActive={activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name === item.name)}
-            onClickCallBack={() => handleRestrictionPress(item)}
-            onLongClickCallBack={() => handleRestrictionLongPress(item)}
-            pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
-            longPressStyle={{ backgroundColor: 'lightblue' }}
-          />
-        )}
-        contentContainerStyle={{alignItems: 'center'}}
-        style={{
-          flexGrow: 0,
-          width: 350,
-          shadowColor: '#000',
-          shadowOffset: { width: 1, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 6,
-          borderRadius: 12, borderWidth: 0, marginTop: 70, marginBottom: 25, marginLeft: 30, marginRight: 5, padding: 10, backgroundColor: 'snow'}}
-        ListFooterComponent={<View style={{ height: 20 }} />}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={{alignItems: 'center'}}>
+        <Text style={{fontSize: 24, fontWeight: 'bold'}}>Select Preffered Cuisines</Text>
+        <FlatList
+          data={cuisines}
+          keyExtractor={(item) => item}
+          renderItem={({ item } ) => (
+            <ItemCard
+              head={cardElement(item)}
+              isActive={activeCuisines.includes(item)}
+              onClickCallBack={() => handleCuisinePress(item)}
+              onLongClickCallBack={() => handleCuisineLongPress(item)}
+              pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
+              longPressStyle={{ backgroundColor: 'lightblue' }}
+            />
+          )}
+          contentContainerStyle={{alignItems: 'center'}}
+          style={{
+            flexGrow: 0,
+            width: 350,
+            shadowColor: '#000',
+            shadowOffset: { width: 1, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 6,
+            borderRadius: 12, borderWidth: 0, marginTop: 45, marginBottom: 25, marginLeft: 5, marginRight: 30, padding: 10, backgroundColor: 'snow'}}
+          ListFooterComponent={<View style={{ height: 20 }} />}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+      <View style={{alignItems: 'center'}}>
+        <Text style={{fontSize: 24, fontWeight: 'bold'}}>Select Food Restrictions</Text>
+        <FlatList
+          data={restrictions}
+          keyExtractor={(item) => item.id }
+          renderItem={({ item } ) => (
+            <ItemCard
+              head={cardElement(item.name)}
+              isActive={activeRestrictions.some(activeRestriction => activeRestriction.name === item.name)}
+              onClickCallBack={() => handleRestrictionPress(item)}
+              onLongClickCallBack={() => handleRestrictionLongPress(item)}
+              pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
+              longPressStyle={{ backgroundColor: 'lightblue' }}
+            />
+          )}
+          contentContainerStyle={{alignItems: 'center'}}
+          style={{
+            flexGrow: 0,
+            width: 350,
+            shadowColor: '#000',
+            shadowOffset: { width: 1, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 6,
+            borderRadius: 12, borderWidth: 0, marginTop: 45, marginBottom: 25, marginLeft: 30, marginRight: 5, padding: 10, backgroundColor: 'snow'}}
+          ListFooterComponent={<View style={{ height: 20 }} />}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </View>  
   );
 }
