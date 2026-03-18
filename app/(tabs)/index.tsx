@@ -71,7 +71,7 @@ const cardElement = (text: string) => {
 
 export default function Index() {
 	const db = useSQLiteContext(); // LET'S SAY YOU WANT TO CALL THE DATABASE, JUST CALL THIS LINE!!
-
+  
 	return (
 		<View
 		style={{

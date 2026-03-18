@@ -1,9 +1,10 @@
 import ItemCard from "@/components/ui/item-card";
 import SearchBar from "@/components/ui/search-bar";
 import * as dbFunctions from "@/src/database_helper_functions";
+import { Button } from "@react-navigation/elements";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
-import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { FlatList, LayoutAnimation, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
 
 const machineIP: string = '127.0.0.1';
@@ -25,15 +26,14 @@ type Item = {
   quantity: number;
 }
 
-// @abe, idk how we should format this
-// @reina this is fine
+
 const cardElement = (text: string, quantity: number, keyword: string) => {
 	console.log(text, quantity, keyword);
 
   if (text === keyword) {
     return (
       <Text style={{marginLeft: 20, fontSize: 18}}>
-        {text} {keyword}, {quantity}
+        {text}, {quantity}
       </Text>
     )
   } else {
@@ -59,14 +59,19 @@ export default function Pantry() {
   const [isFocus, setFocus] = useState(false);
   const [isGroupSelected, setGroupSelected] = useState(false);
   const [isCatSelected, setCatSelected] = useState(false);
-  const [items, setItems] = useState<Item[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [expiry, setExpirey] = useState<Boolean>(false);
+  const [dateOpened, setDateOpened] = useState<string>('');
+  const [datePurchased, setDatePurchased] = useState<string>('');
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [categories, setCategories] = useState<string[]>();
-  const [results, setSearchResults] = useState<ItemResults[]>([]);
-  const [subItems, setCategoryItems] = useState<ItemResults[]>([]);
+  const [items, setItems] = useState<Item[]>([]); // Items in pantry
+  const [activeId, setActiveId] = useState<string | null>(null); // Boolean for current items in pantry
 
+  const [results, setSearchResults] = useState<ItemResults[]>([]); // Items retrieved from search
+  const [categories, setCategories] = useState<string[]>(); // Categories of items retrieved 
+  const [subItems, setCategoryItems] = useState<ItemResults[]>([]); // subcategory items 
+  const [itemId, setItemId] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
@@ -78,7 +83,7 @@ export default function Pantry() {
 	};
   
   useEffect(() => { 
-	   fetchItems();
+	  fetchItems();
   }, []);
 
   useEffect(() => {
@@ -143,31 +148,35 @@ export default function Pantry() {
     console.log(categoryItems);
   }
 
-  const handleCatPress = async (foodId: string, keyword: string) => {
+  const handleCatPress = (foodId: string, keyword: string) => {
+    setItemId(foodId);
+    setKeyword(keyword);
+    setExpirey(true);
     // Handle the other API call here and add to database!
     // do another api call so that we add the right item to the pantry list 
     // (from there, query database and update)
-    const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
+    // const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
       
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
+    // const response = await fetch(url, {
+    //   method: 'GET',
+    //   headers: { 'Accept': 'application/json' }
+    // });
 
-    const data = await response.json();
-    const dataResults = data.results;
-    console.log(dataResults)
+    // const data = await response.json();
+    // const dataResults = data.results;
+    // console.log(dataResults)
 
-	// Update item quantity or add new item to database
-    await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
+	  // // Update item quantity or add new item to database
+    // await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
 
-    dbFunctions.printTable(db);
+    // dbFunctions.printTable(db);
 
-    // Reset everything
+    // // Reset everything
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
-    fetchItems();
+    // // fetchItems();
+    // setExpirey(true);
   }
 
   const handleLongPress = (id: string) => {
@@ -183,6 +192,33 @@ export default function Pantry() {
 	  dbFunctions.printTable(db);
     }, 300);
 
+  };
+
+  const submitDate = async (datePurchased: string, dateOpened: string) => {
+    const url = `http://${currentMachineIP}:8000/add_item?food_id=${itemId}`;
+      
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    const data = await response.json();
+    const dataResults = data.results;
+    console.log(dataResults)
+
+	  // Update item quantity or add new item to database
+    await dbFunctions.insertIntoFoodItem(db, itemId, dataResults, keyword);
+
+    dbFunctions.printTable(db);
+
+    // Reset everything
+    setFocus(false);
+    setGroupSelected(false);
+    setCatSelected(false);
+    setItemId('');
+    setKeyword('');
+    fetchItems();
+    setExpirey(false);
   };
 
   return (
@@ -247,7 +283,23 @@ export default function Pantry() {
         </View>
 
       ) : (<View style={{margin: 15}}></View>)}
-
+      {expiry ? (
+        <View style={{marginBottom: 5, justifyContent: 'center', alignItems: 'center'}}>
+          <TextInput
+            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 225}}
+            value={datePurchased}
+            onChangeText={setDatePurchased}
+            placeholder="Date Purchased: MM/DD/YY"
+          />
+          <TextInput
+            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 250, marginTop: 10, marginBottom: 10}}
+            value={dateOpened}
+            onChangeText={setDateOpened}
+            placeholder="Date Opened: MM/DD/YY or Empty"
+          />
+          <Button style={{width: 220}} onPress={() => submitDate(datePurchased, dateOpened)}>Submit</Button>
+        </View>
+      ) : (<View></View>)}
       <FlatList
         data={items}
         keyExtractor={(item) => item.id}
