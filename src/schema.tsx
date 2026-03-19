@@ -69,7 +69,7 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 
 			quantity INTEGER NOT NULL,
 			datePurchased TEXT NOT NULL,
-			dateOpened TEXT NOT NULL,
+			dateOpened TEXT,
 			keyword TEXT
 		);
   	`);

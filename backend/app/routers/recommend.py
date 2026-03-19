@@ -1,5 +1,5 @@
 import datetime
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, APIRouter
 from backend.app.models import RecommendationRequest
 from backend.app.database import get_db
 from sqlalchemy import text, bindparam, BigInteger
@@ -15,7 +15,7 @@ MEAL_RANGES = [
     (12, 15, 1),  # lunch
     (15, 18, 3),  # snack
     (18, 24, 2),  # dinner
-    (0, 5, 3)     # late snack
+    (0, 5, 3)     # (late) snack
 ]
 
 def get_time_of_day():
@@ -68,6 +68,6 @@ async def get_top_recipes(request: RecommendationRequest, limit: int = 10, meal_
         pantry_match_scores.append(ingredient_perc_matching)
         expiry_scores.append(expired_boost)
     
-    return {"recipes": recipes, "scores": pantry_match_scores, "expiry_status": expiry_scores}
+    return {"recipes": recipes, "ingredient_match_scores": pantry_match_scores, "expiry_status": expiry_scores}
     
 

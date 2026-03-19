@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from datetime import date
 from typing import List
 from enum import Enum
+    
+class RecipeSelection(BaseModel):
+    user_id: int
+    recipe_id: int
 
 """ (Input format for /recommend input)
 User “Snapshot” (RecommendationRequest model):
@@ -42,6 +46,5 @@ class RecommendationRequest(BaseModel):
     # restrictions and preferred_cuisines should take in IDs (ints) for more efficient querying (less joins)
     restrictions: List[int]             
     preferred_cuisines: List[int]
-
 
 
