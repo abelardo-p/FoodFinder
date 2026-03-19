@@ -2,7 +2,6 @@ import ItemCardCollapsible from '@/components/ui/item-card-collapsible';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useEffect } from 'react';
 import { View, Text, FlatList } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 
 import * as dbFunctions from "@/src/database_helper_functions";
 
