@@ -173,3 +173,45 @@ export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, 
 	}
 
 }
+
+export async function updateFoodItemStorageType(db: SQLite.SQLiteDatabase, id: string, storageType: StorageOption) {
+	const foodStorageInsertion = await db.prepareAsync(`
+  		INSERT OR REPLACE INTO FoodStorage (id, storage, state, minDays, maxDays) 
+		VALUES ($foodID, $storage, $state, $minDays, $maxDays)
+	`);
+
+	try {
+		let result = await foodStorageInsertion.executeAsync({
+			$foodID: id,
+			$storage: storageType.storage,
+			$state: storageType.state,
+			$minDays: storageType.min_days,
+			$maxDays: storageType.max_days,
+		});
+		console.log(result.lastInsertRowId, result.changes);
+	} catch (error) {
+		console.log(error);
+	} finally {
+		await foodStorageInsertion.finalizeAsync();
+	}
+}
+
+export async function updateFoodItemDateOpened(db: SQLite.SQLiteDatabase, id: string, dateOpened: string) {
+	const foodItemUpdate = await db.prepareAsync(`
+  		UPDATE FoodItem 
+		SET dateOpened = $dateOpened
+		WHERE id = $foodID;
+	`);
+
+	try {
+		let result = await foodItemUpdate.executeAsync({
+			$foodID: id,
+			$dateOpened: dateOpened,
+		});
+		console.log(result.changes);
+	} catch (error) {
+		console.log(error);
+	} finally {
+		await foodItemUpdate.finalizeAsync();
+	}
+}
