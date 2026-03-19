@@ -94,7 +94,7 @@ def load_all(username: str, port: int, load_mode: str = 'append'):
 
 if __name__ == '__main__':
     table_name = 'reciperestrictiontype'
-    csv_path = 'data/more_recipes/healthlabels'
+    csv_path = '/Users/anikaraghavan/Downloads/more_recipess/healthlabels'
     username = 'anikaraghavan'
     load_mode = 'append'
     port = 5432

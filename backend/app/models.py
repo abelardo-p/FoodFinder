@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from datetime import date
 from typing import List
 from enum import Enum
+    
+class RecipeSelection(BaseModel):
+    user_id: int
+    recipe_id: int
 
 """ (Input format for /recommend input)
 User “Snapshot” (RecommendationRequest model):
@@ -12,7 +16,7 @@ User “Snapshot” (RecommendationRequest model):
 "name": "milk",
 "date_purchased": "03/10/2026",
 "date_opened": "03/10/2026", 
-"storage_option": {“state”: “open”, ”storage": "fridge", "min_days": 5, "max_days": 7}
+"storage_option": StorageOption{“state”: “open”, ”storage": "fridge", "min_days": 5, "max_days": 7}
 }
 ],
 "allergies": ["peanut"],
@@ -26,7 +30,7 @@ class StorageType(str, Enum):
 
 class StorageOption(BaseModel):
     state: str   
-    storage: str
+    storage: StorageType | None
     min_days: int
     max_days: int
 
@@ -35,13 +39,12 @@ class PantryItem(BaseModel):
     name: str
     date_purchased: date
     date_opened : date | None = None
-    storage_options: StorageOption | None
+    storage_option: StorageOption | None
 
 class RecommendationRequest(BaseModel):
     pantry_items: List[PantryItem]
     # restrictions and preferred_cuisines should take in IDs (ints) for more efficient querying (less joins)
     restrictions: List[int]             
     preferred_cuisines: List[int]
-
 
 

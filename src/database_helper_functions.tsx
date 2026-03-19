@@ -1,10 +1,5 @@
 import * as SQLite from 'expo-sqlite';
 
-// Uhh we need some mechanism to save 
-// preferences and what they avoid I am working on the frontend 
-// for that but would like some functions like “add preference” 
-// or “add restriction” with a delete counterpart and if possible
-//  a  “load  preference”
 
 interface StorageOption {
   state: string;
@@ -24,8 +19,6 @@ interface FoodData {
 }
 
 
-
-
 // returns in this format: MM/DD/YYYY
 const getCurrFormattedDate = () => {
   const today = new Date();
@@ -33,7 +26,7 @@ const getCurrFormattedDate = () => {
   const month = String(today.getMonth() + 1).padStart(2, '0'); 
   const year = today.getFullYear();
   const date = String(today.getDate()).padStart(2, '0');
-
+  console.log(`${month}/${date}/${year}`);
   return `${month}/${date}/${year}`; 
 };
 
@@ -118,12 +111,16 @@ export async function fetchItemsForPantry(db: SQLite.SQLiteDatabase) {
 	
 }
 
-export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, foodObj: FoodData, keyword: string) {
+export async function insertIntoFoodItem(db: SQLite.SQLiteDatabase, id: string, foodObj: FoodData, 
+											keyword: string, datePurchased: string, dateOpened: string | null) {
 
 	// Dummy variables for now:
 	const quantity = 1;
-	const datePurchased = getCurrFormattedDate(); // ASSUMED THAT ADDED DATE IS PURCHASED DATE
-	const dateOpened = null; // TODO: THIS IS STILL A DUMMY VARIABLE
+	if (dateOpened && dateOpened.length == 0) {
+		dateOpened = null
+	}
+	// const datePurchased = getCurrFormattedDate(); // ASSUMED THAT ADDED DATE IS PURCHASED DATE
+	// const dateOpened = null; // TODO: THIS IS STILL A DUMMY VARIABLE
 
 	const foodItemInsertion = await db.prepareAsync(`
   		INSERT INTO FoodItem (id, name, category, quantity, datePurchased, dateOpened, keyword) 

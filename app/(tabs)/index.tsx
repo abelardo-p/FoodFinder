@@ -1,9 +1,15 @@
 import ItemCardCollapsible from '@/components/ui/item-card-collapsible';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useState, useEffect } from 'react';
 import { View, Text, FlatList } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+
+import * as dbFunctions from "@/src/database_helper_functions";
+
+const LIMIT = 25;
 
 type Meal = {
-  id: string;
+  id: string; 
   name: string;
   ingredients: string[];
 };
@@ -61,6 +67,13 @@ const meals: Meal[] = [
   },
 ];
 
+type Item = {
+  id: string;
+  name: string;
+  keyword: string;
+  quantity: number;
+}
+
 const cardElement = (text: string) => {
   return (
     <Text style={{fontSize: 18}}>
@@ -71,7 +84,27 @@ const cardElement = (text: string) => {
 
 export default function Index() {
 	const db = useSQLiteContext(); // LET'S SAY YOU WANT TO CALL THE DATABASE, JUST CALL THIS LINE!!
+  const [items, setItems] = useState<Item[]>([]); // Items in pantry
 
+  // const fetchItems = async () => {
+  //   const foodItems = await dbFunctions.fetchItemsForPantry(db);
+  //   console.log(foodItems);
+  //   setItems((foodItems as Item[]) ?? []);
+  // };
+
+  // const fetchRecommendations = async () => {
+  //   const url = `/recommend/${LIMIT}`;
+  //   const respone = await fetch(url, {
+  //     method: 'POST',
+  //     headers: {},
+  //     body: {'this'}
+  //   })
+  // };
+  // useEffect(() => { 
+  //   fetchItems();
+  //   fetchRecommendations();
+  // }, []);
+  
 	return (
 		<View
 		style={{
