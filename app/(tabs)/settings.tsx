@@ -10,7 +10,10 @@ type restriction = {
   name: string;
 }
 
-type cuisine = string
+type cuisine = {
+  id: string;
+  name: string;
+}
 
 const ALLERGY_TABLE = "Allergy";
 const CUISINE_TABLE = "Cuisine";
@@ -30,6 +33,30 @@ const restrictionList: restriction[] = [
   { id: "12", name: "low sugar" }
 ];
 
+const cuisineList: cuisine[] = [
+  { id: "1", name: "american" },
+  { id: "2", name: "asian" },
+  { id: "3", name: "italian" },
+  { id: "4", name: "nordic" },
+  { id: "5", name: "mediterranean" },
+  { id: "6", name: "british" },
+  { id: "7", name: "chinese" },
+  { id: "8", name: "eastern europe" },
+  { id: "9", name: "world" },
+  { id: "10", name: "middle eastern" },
+  { id: "11", name: "indian" },
+  { id: "12", name: "mexican" },
+  { id: "13", name: "south east asian" },
+  { id: "14", name: "french" },
+  { id: "15", name: "south american" },
+  { id: "16", name: "japanese" },
+  { id: "17", name: "central europe" },
+  { id: "18", name: "greek" },
+  { id: "19", name: "caribbean" },
+  { id: "20", name: "korean" },
+  { id: "21", name: "kosher" }
+];
+
 const cuisine_type = ["american", "asian", "south east asian", "french", "italian", "south american", "world", "mediterranean", "nordic", "british", "chinese", "eastern europe", "middle eastern", "central europe", "mexican", "indian", "japanese", "kosher", "caribbean"];
 
 const cardElement = (text: string) => {
@@ -46,7 +73,7 @@ export default function Index() {
   // Show allergends under differnt context
 
   //Same for cuisines
-  const [cuisines, setcuisines] = useState<cuisine[]>(cuisine_type);
+  const [cuisines, setcuisines] = useState<cuisine[]>(cuisineList);
   const [activeCuisines, setActiveCuisines] = useState<cuisine[]>([]);
 
   const [restrictions, setRestrictions] = useState<restriction[]>(restrictionList);
@@ -57,7 +84,7 @@ export default function Index() {
     if (table === ALLERGY_TABLE) {
       setActiveRestrictions((preferences as restriction[]) ?? []);
     } else {
-      const preferredCuisines = (preferences as restriction[]).map(p => p.name);
+      const preferredCuisines = (preferences as restriction[]).map(p => ({id: p.id, name: p.name}));
       setActiveCuisines(preferredCuisines as cuisine[] ?? []);
     }
 	};
@@ -79,14 +106,14 @@ export default function Index() {
 	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.name);
 	  }
   };
-  const handleCuisinePress = (cuisine: string) => {
-    if (!activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
+  const handleCuisinePress = (cuisine: cuisine) => {
+    if (!activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
       setActiveCuisines(cuisines => [...cuisines, cuisine]);
 	    dbFunctions.insertPreference(db, CUISINE_TABLE, cuisine);
     }
   }
-  const handleCuisineLongPress = (cuisine: string) => {
-    if (activeCuisines.some(activeCuisine => activeCuisine === cuisine)) {
+  const handleCuisineLongPress = (cuisine: cuisine) => {
+    if (activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
       setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine !== cuisine));
 	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine);
     }
@@ -97,10 +124,10 @@ export default function Index() {
         <Text style={{fontSize: 24, fontWeight: 'bold'}}>Select Preffered Cuisines</Text>
         <FlatList
           data={cuisines}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.id}
           renderItem={({ item } ) => (
             <ItemCard
-              head={cardElement(item)}
+              head={cardElement(item.name)}
               isActive={activeCuisines.includes(item)}
               onClickCallBack={() => handleCuisinePress(item)}
               onLongClickCallBack={() => handleCuisineLongPress(item)}
