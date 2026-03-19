@@ -95,9 +95,15 @@ export default function Index() {
 				await fetchPreferences(CUISINE_TABLE);
 		};
 		loadPreferences();
-		console.log("Active cuisines:", activeCuisines);
-		console.log("Active restrictions:", activeRestrictions);
 	}, []);
+
+	useEffect(() => {
+			console.log("Active cuisines:", activeCuisines);
+	}, [activeCuisines]);
+
+	useEffect(() => {
+			console.log("Active restrictions:", activeRestrictions);
+	}, [activeRestrictions]);
   
   const handleRestrictionPress = (item: restriction) => {
     if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
@@ -109,7 +115,6 @@ export default function Index() {
     if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(activeRestrictions.filter(activeRestriction => activeRestriction.id !== item.id && activeRestriction.name !== item.name));
 	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.id);
-		console.log("Active restrictions:", activeRestrictions);
 	  }
   };
   const handleCuisinePress = (cuisine: cuisine) => {
@@ -124,7 +129,6 @@ export default function Index() {
     if (activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
       setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine.id !== cuisine.id));
 	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine.id);
-		console.log("Active cuisines:", activeCuisines);
     }
   }
   return (
