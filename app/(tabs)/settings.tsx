@@ -89,46 +89,55 @@ export default function Index() {
     }
 	};
   
-  useEffect(() => { 
-    fetchPreferences(ALLERGY_TABLE);
-    fetchPreferences(CUISINE_TABLE);
-  }, []);
+	useEffect(() => {
+		const loadPreferences = async () => {
+				await fetchPreferences(ALLERGY_TABLE);
+				await fetchPreferences(CUISINE_TABLE);
+		};
+		loadPreferences();
+		console.log("Active cuisines:", activeCuisines);
+		console.log("Active restrictions:", activeRestrictions);
+	}, []);
   
   const handleRestrictionPress = (item: restriction) => {
     if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(items => [...items, item]);
-	    dbFunctions.insertPreference(db, ALLERGY_TABLE, item.name);
+	    dbFunctions.insertPreference(db, ALLERGY_TABLE, item.name, item.id);
     }
   };
   const handleRestrictionLongPress = (item: restriction) => {
     if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
       setActiveRestrictions(activeRestrictions.filter(activeRestriction => activeRestriction.id !== item.id && activeRestriction.name !== item.name));
-	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.name);
+	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.id);
+		console.log("Active restrictions:", activeRestrictions);
 	  }
   };
   const handleCuisinePress = (cuisine: cuisine) => {
     if (!activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
       setActiveCuisines(cuisines => [...cuisines, cuisine]);
-	    dbFunctions.insertPreference(db, CUISINE_TABLE, cuisine);
+	    dbFunctions.insertPreference(db, CUISINE_TABLE, cuisine.name, cuisine.id);
+		
+		
     }
   }
   const handleCuisineLongPress = (cuisine: cuisine) => {
     if (activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
-      setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine !== cuisine));
-	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine);
+      setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine.id !== cuisine.id));
+	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine.id);
+		console.log("Active cuisines:", activeCuisines);
     }
   }
   return (
     <View style={{flex: 1, marginTop: 25, marginBottom: 20, flexDirection: 'row', justifyContent: 'center'}}>
       <View style={{alignItems: 'center'}}>
-        <Text style={{fontSize: 24, fontWeight: 'bold'}}>Select Preffered Cuisines</Text>
+        <Text style={{fontSize: 24, fontWeight: 'bold'}}>Select Preferred Cuisines</Text>
         <FlatList
           data={cuisines}
           keyExtractor={(item) => item.id}
           renderItem={({ item } ) => (
             <ItemCard
               head={cardElement(item.name)}
-              isActive={activeCuisines.includes(item)}
+              isActive={activeCuisines.some(activeCuisine => activeCuisine.name === item.name)}
               onClickCallBack={() => handleCuisinePress(item)}
               onLongClickCallBack={() => handleCuisineLongPress(item)}
               pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}

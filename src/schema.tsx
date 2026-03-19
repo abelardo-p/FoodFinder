@@ -2,7 +2,6 @@ import * as SQLite from 'expo-sqlite';
 
 
 async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
-	// deleteAllTablesFromDB(db);
 
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
@@ -23,15 +22,28 @@ async function createFoodItemTable(db: SQLite.SQLiteDatabase) {
 
 }
 
+
+async function createUser(db: SQLite.SQLiteDatabase) {
+
+	await db.execAsync(`
+		PRAGMA journal_mode = WAL; 
+		CREATE TABLE IF NOT EXISTS User (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL 
+		);
+  	`);
+
+}
+
 async function createPreferenceTables(db: SQLite.SQLiteDatabase) {
 	await db.execAsync(`
 		PRAGMA journal_mode = WAL; 
 		CREATE TABLE IF NOT EXISTS Allergy (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL UNIQUE
 		);
 		CREATE TABLE IF NOT EXISTS Cuisine (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			id TEXT PRIMARY KEY,
 			name TEXT NOT NULL UNIQUE
 		);
   	`);

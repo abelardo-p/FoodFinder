@@ -70,13 +70,12 @@ export const printTable = async (db: SQLite.SQLiteDatabase) => {
 
 }
 
-// await insert_preference(db, CUISINE_TABLE, CUISINE_COL, "italian");
-export const insertPreference = async (db: SQLite.SQLiteDatabase, table: string, value: string) => {
-	await db.runAsync(`INSERT OR IGNORE INTO ${table} (name) VALUES (?);`, [value]);
+export const insertPreference = async (db: SQLite.SQLiteDatabase, table: string, name: string, id: string) => {
+    await db.runAsync(`INSERT OR IGNORE INTO ${table} (id, name) VALUES (?, ?);`, [id, name]);
 }
 
-export const deletePreference = async (db: SQLite.SQLiteDatabase, table: string, value: string) => {
-    await db.runAsync(`DELETE FROM ${table} WHERE name = ?;`, [value]);
+export const deletePreference = async (db: SQLite.SQLiteDatabase, table: string, id: string) => {
+    await db.runAsync(`DELETE FROM ${table} WHERE id = ?;`, [id]);
 }
 
 export const fetchPreferences = async (db: SQLite.SQLiteDatabase, table: string) => {
