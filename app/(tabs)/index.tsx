@@ -6,6 +6,8 @@ import { Picker } from "@react-native-picker/picker";
 
 import * as dbFunctions from "@/src/database_helper_functions";
 
+const LIMIT = 25;
+
 type Meal = {
   id: string; 
   name: string;
@@ -90,9 +92,13 @@ export default function Index() {
   //   setItems((foodItems as Item[]) ?? []);
   // };
 
-  // const fetchRecommendations = () => {
-  //   url = 
-  //   const respone = await fetch()
+  // const fetchRecommendations = async () => {
+  //   const url = `/recommend/${LIMIT}`;
+  //   const respone = await fetch(url, {
+  //     method: 'POST',
+  //     headers: {},
+  //     body: {'this'}
+  //   })
   // };
   // useEffect(() => { 
   //   fetchItems();
