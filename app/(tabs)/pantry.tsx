@@ -207,7 +207,7 @@ export default function Pantry() {
     console.log(dataResults)
 
 	  // Update item quantity or add new item to database
-    await dbFunctions.insertIntoFoodItem(db, itemId, dataResults, keyword);
+    await dbFunctions.insertIntoFoodItem(db, itemId, dataResults, keyword, datePurchased, dateOpened);
 
     dbFunctions.printTable(db);
 
@@ -217,6 +217,8 @@ export default function Pantry() {
     setCatSelected(false);
     setItemId('');
     setKeyword('');
+    setDateOpened('');
+    setDatePurchased('');
     fetchItems();
     setExpirey(false);
   };
@@ -286,18 +288,18 @@ export default function Pantry() {
       {expiry ? (
         <View style={{marginBottom: 5, justifyContent: 'center', alignItems: 'center'}}>
           <TextInput
-            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 225}}
+            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 235}}
             value={datePurchased}
             onChangeText={setDatePurchased}
-            placeholder="Date Purchased: MM/DD/YY"
+            placeholder="Date Purchased: MM/DD/YYYY"
           />
           <TextInput
-            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 250, marginTop: 10, marginBottom: 10}}
+            style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 260, marginTop: 10, marginBottom: 10}}
             value={dateOpened}
             onChangeText={setDateOpened}
-            placeholder="Date Opened: MM/DD/YY or Empty"
+            placeholder="Date Opened: MM/DD/YYYY or Empty"
           />
-          <Button style={{width: 220}} onPress={() => submitDate(datePurchased, dateOpened)}>Submit</Button>
+          <Button style={{width: 225}} onPress={() => submitDate(datePurchased, dateOpened)}>Submit</Button>
         </View>
       ) : (<View></View>)}
       <FlatList
@@ -309,7 +311,7 @@ export default function Pantry() {
             isActive={activeId === item.id}
             onClickCallBack={() => {}}
             onLongClickCallBack={() => handleLongPress(item.id)}
-            pressableStyle={{ alignItems: 'flex-start', margin: 5, minHeight: 80, minWidth: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
+            pressableStyle={{ alignItems: 'flex-start', margin: 5, minHeight: 80, minWidth: 260, maxWidth: 260, borderWidth: 0, borderRadius: 15}}
             longPressStyle={{ backgroundColor: 'lightcoral' }}
           />
         )}
