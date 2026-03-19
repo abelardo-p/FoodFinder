@@ -101,7 +101,7 @@ export async function deleteItemFromDB(id: number, db: SQLite.SQLiteDatabase) {
 export async function fetchItemsForPantry(db: SQLite.SQLiteDatabase) {
 
 	try {
-      return await db.getAllAsync('SELECT id, name, keyword, quantity FROM FoodItem');
+      return await db.getAllAsync('SELECT * FROM FoodItem');
 
     } catch (error) {
       console.error("Failed to fetch items", error);
