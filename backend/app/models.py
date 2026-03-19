@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 from typing import List
 from enum import Enum
+from backend.app.utils import get_time_of_day
     
 class RecipeSelection(BaseModel):
     user_id: int
@@ -42,9 +43,14 @@ class PantryItem(BaseModel):
     storage_option: StorageOption | None
 
 class RecommendationRequest(BaseModel):
+    user_id: int
+    limit: int = 10
+    meal_type: int = get_time_of_day()
+
     pantry_items: List[PantryItem]
-    # restrictions and preferred_cuisines should take in IDs (ints) for more efficient querying (less joins)
+    # restrictions and preferred_cuisines should take in IDs (ints) for more efficient querying/joins
     restrictions: List[int]             
     preferred_cuisines: List[int]
+    
 
 

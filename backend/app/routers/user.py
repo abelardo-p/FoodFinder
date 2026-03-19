@@ -35,4 +35,4 @@ async def select_recipe(selection: RecipeSelection, db = Depends(get_db)):
                             "liked_at": datetime.now(timezone.utc)}
             )
     db.commit()
-    
+    return {"status" : "ok"}
