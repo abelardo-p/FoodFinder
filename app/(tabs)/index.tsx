@@ -1,7 +1,7 @@
 import ItemCardCollapsible from '@/components/ui/item-card-collapsible';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useEffect } from 'react';
-import { View, Text, FlatList, Linking, Pressable } from "react-native";
+import { View, Text, FlatList, Linking, Pressable, Image} from "react-native";
 import { Button } from "@react-navigation/elements";
 import * as dbFunctions from "@/src/database_helper_functions";
 
@@ -9,6 +9,163 @@ const LIMIT = 9;
 const ALLERGY_TABLE = "Allergy";
 const CUISINE_TABLE = "Cuisine";
 
+const info = {
+  "user_id": 8,
+  "limit": 20,
+  "meal_type": 2,
+  "pantry_items": [
+    {
+      "id": 250,
+      "name": "avocado",
+      "date_purchased": "2026-03-16",
+      "date_opened": null,
+      "storage_option": {
+        "state": "unopened",
+        "storage": "FRIDGE",
+        "min_days": 3,
+        "max_days": 4
+      }
+    },
+    {
+      "id": 333,
+      "name": "beans",
+      "date_purchased": "2026-03-17",
+      "date_opened": "2026-03-19",
+      "storage_option": {
+        "state": "opened",
+        "storage": "PANTRY",
+        "min_days": 365,
+        "max_days": 365
+      }
+    },
+    {
+      "id": 338,
+      "name": "rice",
+      "date_purchased": "2026-03-17",
+      "date_opened": null,
+      "storage_option": {
+        "state": "opened",
+        "storage": "PANTRY",
+        "min_days": 730,
+        "max_days": 730
+      }
+    },
+    {
+      "id": 306,
+      "name": "tomatoes",
+      "date_purchased": "2026-03-17",
+      "date_opened": "2026-03-17",
+      "storage_option": {
+        "state": "opened",
+        "storage": "FREEZER",
+        "min_days": 60,
+        "max_days": 60
+      }
+    },
+    {
+      "id": 294,
+      "name": "onions",
+      "date_purchased": "2026-03-01",
+      "date_opened": "2026-03-15",
+      "storage_option": {
+        "state": "opened",
+        "storage": "FRIDGE",
+        "min_days": 60,
+        "max_days": 60
+      }
+    },
+    {
+      "id": 473,
+      "name": "cumin",
+      "date_purchased": "2026-03-01",
+      "date_opened": "2026-03-15",
+      "storage_option": {
+        "state": "opened",
+        "storage": "PANTRY",
+        "min_days": 1095,
+        "max_days": 1460
+      }
+    },
+    {
+      "id": 227,
+      "name": "oil-generic",
+      "date_purchased": "2026-03-01",
+      "date_opened": "2026-03-15",
+      "storage_option": {
+        "state": "opened",
+        "storage": "PANTRY",
+        "min_days": 90,
+        "max_days": 150
+      }
+    },
+
+    {
+      "id": 598,
+      "name": "garam masala",
+      "date_purchased": "2026-03-01",
+      "date_opened": null,
+      "storage_option": {
+        "state": "opened",
+        "storage": "PANTRY",
+        "min_days": 365,
+        "max_days": 365
+      }
+    },
+    {
+      "id": 506,
+      "name": "cilantro",
+      "date_purchased": "2026-03-01",
+      "date_opened": null,
+      "storage_option": {
+        "state": "default",
+        "storage": "FRIDGE",
+        "min_days": 14,
+        "max_days": 21
+      }
+    },
+    {
+      "id": 285,
+      "name": "garlic",
+      "date_purchased": "2026-03-10",
+      "date_opened": null,
+      "storage_option": {
+        "state": "default",
+        "storage": "FRIDGE",
+        "min_days": 3,
+        "max_days": 14
+      }
+    },
+    {
+      "id": 118,
+      "name": "chicken parts (leg/thigh)",
+      "date_purchased": "2026-03-17",
+      "date_opened": null,
+      "storage_option": {
+        "state": "default",
+        "storage": "FRIDGE",
+        "min_days": 1,
+        "max_days": 2
+      }
+    },
+    {
+      "id": 334,
+      "name": "lentils (dried)",
+      "date_purchased": "2026-03-18",
+      "date_opened": null,
+      "storage_option": {
+        "state": "default",
+        "storage": "PANTRY",
+        "min_days": 365,
+        "max_days": 365
+      }
+    }
+   
+  ],
+  "restrictions": [],
+  "preferred_cuisines": [
+    11
+  ]
+}
 type Meal = {
   id: string; 
   name: string;
@@ -153,7 +310,7 @@ export default function Index() {
   const getPantryItem = (item: any): pantryItem => {
     let datePurchased = item.datePurchased.split('/'); 
     let dateOpened = undefined;
-
+    console.log('hello', item);
     if (item.dateOpened && item.dateOpened.length > 8) {
       dateOpened = item.dateOpened.split('/');
       dateOpened = [dateOpened[2], dateOpened[0], dateOpened[1]].join('-')
@@ -173,8 +330,6 @@ export default function Index() {
   };
 
   const fetchRecommendations = async () => {
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    // await delay(1000);
     const url = `http://localhost:8000/recommend/`;
 
     let pantryData = {
@@ -224,7 +379,11 @@ export default function Index() {
             onPress={() => {}}
             pressableStyle={{margin: 5, minHeight: 80, width:250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}
           >
-            <Text style={{marginTop: 0, margin: 15}}>{item.cuisine}: <a></a>{}</Text>
+            <Text style={{fontSize: 16, marginTop: 0, margin: 15}}><Text>Cuisine: {item.cuisine}</Text> <A href={item.link}><Text style={{fontSize: 14, fontWeight: 'bold', color: 'darkblue'}}>View Recipe</Text></A></Text>
+            <Image
+              source={{ uri: item.image_link }}
+              style={{ width: 100, height: 100, margin: 10 }}
+            />
           </ItemCardCollapsible>
         )}
         style={{ 

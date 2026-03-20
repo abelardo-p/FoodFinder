@@ -202,6 +202,7 @@ export default function Pantry() {
     setKeyword('');
     setDateOpened('');
     setDatePurchased('');
+    setStorage('');
     fetchItems();
     setExpirey(false);
   };
@@ -290,7 +291,7 @@ export default function Pantry() {
             onChangeText={setDateOpened}
             placeholder="Date Opened: MM/DD/YYYY or Empty"
           />
-          <Button style={{width: 225}} onPress={() => {submitDate(datePurchased, dateOpened); setStorage('')}}>Submit</Button>
+          <Button style={{width: 225}} onPress={() => {submitDate(datePurchased, dateOpened)}}>Submit</Button>
         </View>
       ) : (<View></View>)}
       <FlatList
