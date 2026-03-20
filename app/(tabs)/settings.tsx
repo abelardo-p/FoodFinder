@@ -57,8 +57,6 @@ const cuisineList: cuisine[] = [
   { id: "21", name: "kosher" }
 ];
 
-const cuisine_type = ["american", "asian", "south east asian", "french", "italian", "south american", "world", "mediterranean", "nordic", "british", "chinese", "eastern europe", "middle eastern", "central europe", "mexican", "indian", "japanese", "kosher", "caribbean"];
-
 const cardElement = (text: string) => {
   return (
       <Text style={{textAlign: 'center', fontSize: 18}}>
@@ -81,11 +79,12 @@ export default function Index() {
 
   const fetchPreferences = async (table: string) => {
     const preferences = await dbFunctions.fetchPreferences(db, table);
+    console.log(preferences);
     if (table === ALLERGY_TABLE) {
-      setActiveRestrictions((preferences as restriction[]) ?? []);
+      setActiveRestrictions(((preferences as restriction[]) ?? []).map(p => ({id: String(p.id), name: p.name})));
     } else {
-      const preferredCuisines = (preferences as restriction[]).map(p => ({id: p.id, name: p.name}));
-      setActiveCuisines(preferredCuisines as cuisine[] ?? []);
+      // const preferredCuisines = ((preferences as cuisine[]) ?? []);
+      setActiveCuisines(((preferences as cuisine[]) ?? []).map(p => ({id: String(p.id), name: p.name})));
     }
 	};
   
@@ -95,13 +94,13 @@ export default function Index() {
   }, []);
   
   const handleRestrictionPress = (item: restriction) => {
-    if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
+    if (!activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name === item.name)) {
       setActiveRestrictions(items => [...items, item]);
-	    dbFunctions.insertPreference(db, ALLERGY_TABLE, item.name);
+	    dbFunctions.insertPreference(db, ALLERGY_TABLE, Number(item.id), item.name);
     }
   };
   const handleRestrictionLongPress = (item: restriction) => {
-    if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name == item.name)) {
+    if (activeRestrictions.some(activeRestriction => activeRestriction.id === item.id && activeRestriction.name === item.name)) {
       setActiveRestrictions(activeRestrictions.filter(activeRestriction => activeRestriction.id !== item.id && activeRestriction.name !== item.name));
 	    dbFunctions.deletePreference(db, ALLERGY_TABLE, item.name);
 	  }
@@ -109,13 +108,13 @@ export default function Index() {
   const handleCuisinePress = (cuisine: cuisine) => {
     if (!activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
       setActiveCuisines(cuisines => [...cuisines, cuisine]);
-	    dbFunctions.insertPreference(db, CUISINE_TABLE, cuisine);
+	    dbFunctions.insertPreference(db, CUISINE_TABLE, Number(cuisine.id), cuisine.name);
     }
   }
   const handleCuisineLongPress = (cuisine: cuisine) => {
-    if (activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id)) {
-      setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine !== cuisine));
-	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine);
+    if (activeCuisines.some(activeCuisine => activeCuisine.id === cuisine.id && activeCuisine.name === cuisine.name)) {
+      setActiveCuisines(activeCuisines.filter(activeCuisine => activeCuisine.id !== cuisine.id && activeCuisine.name !== cuisine.name));
+	    dbFunctions.deletePreference(db, CUISINE_TABLE, cuisine.name);
     }
   }
   return (
@@ -128,7 +127,7 @@ export default function Index() {
           renderItem={({ item } ) => (
             <ItemCard
               head={cardElement(item.name)}
-              isActive={activeCuisines.includes(item)}
+              isActive={activeCuisines.some(activeCuisine => activeCuisine.name === item.name)}
               onClickCallBack={() => handleCuisinePress(item)}
               onLongClickCallBack={() => handleCuisineLongPress(item)}
               pressableStyle={{ alignItems: 'center', margin: 6, height: 80, minWidth: 225, width: 250, maxWidth: 250, borderWidth: 0, borderRadius: 15}}

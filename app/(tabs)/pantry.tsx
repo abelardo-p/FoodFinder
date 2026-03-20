@@ -62,7 +62,7 @@ export default function Pantry() {
   const [expiry, setExpirey] = useState<Boolean>(false);
   const [dateOpened, setDateOpened] = useState<string>('');
   const [datePurchased, setDatePurchased] = useState<string>('');
-
+  const [storage, setStorage] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<Item[]>([]); // Items in pantry
   const [activeId, setActiveId] = useState<string | null>(null); // Boolean for current items in pantry
@@ -152,24 +152,7 @@ export default function Pantry() {
     setItemId(foodId);
     setKeyword(keyword);
     setExpirey(true);
-    // Handle the other API call here and add to database!
-    // do another api call so that we add the right item to the pantry list 
-    // (from there, query database and update)
-    // const url = `http://${currentMachineIP}:8000/add_item?food_id=${foodId}`;
-      
-    // const response = await fetch(url, {
-    //   method: 'GET',
-    //   headers: { 'Accept': 'application/json' }
-    // });
 
-    // const data = await response.json();
-    // const dataResults = data.results;
-    // console.log(dataResults)
-
-	  // // Update item quantity or add new item to database
-    // await dbFunctions.insertIntoFoodItem(db, foodId, dataResults, keyword);
-
-    // dbFunctions.printTable(db);
 
     // // Reset everything
     setFocus(false);
@@ -211,7 +194,7 @@ export default function Pantry() {
 
     dbFunctions.printTable(db);
 
-    // Reset everything
+    // Reset everythingc
     setFocus(false);
     setGroupSelected(false);
     setCatSelected(false);
@@ -293,13 +276,21 @@ export default function Pantry() {
             onChangeText={setDatePurchased}
             placeholder="Date Purchased: MM/DD/YYYY"
           />
+          {storage === '' ? (
+              <View style={{flexDirection: 'row', margin: 20, marginBottom: 0}}>
+                <Button onPress={() => setStorage('PANTRY')}>Pantry</Button>
+                <Button onPress={() => setStorage('FRIDGE')}>Fridge</Button>
+                <Button onPress={() => setStorage('FREEZER')}>Freezer</Button>
+              </View>
+            )
+          : <View></View>}
           <TextInput
             style={{backgroundColor: 'white', padding: 10, borderWidth: 2, borderRadius: 10, width: 260, marginTop: 10, marginBottom: 10}}
             value={dateOpened}
             onChangeText={setDateOpened}
             placeholder="Date Opened: MM/DD/YYYY or Empty"
           />
-          <Button style={{width: 225}} onPress={() => submitDate(datePurchased, dateOpened)}>Submit</Button>
+          <Button style={{width: 225}} onPress={() => {submitDate(datePurchased, dateOpened); setStorage('')}}>Submit</Button>
         </View>
       ) : (<View></View>)}
       <FlatList
